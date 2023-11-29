@@ -5,12 +5,16 @@ import {IEntryPoint} from "account-abstraction/interfaces/IEntryPoint.sol";
 import {BaseAccount} from "account-abstraction/core/BaseAccount.sol";
 import {UserOperation} from "account-abstraction/interfaces/UserOperation.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {TokenCallbackHandler} from "account-abstraction/samples/callback/TokenCallbackHandler.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-contract Wallet is BaseAccount {
+contract Wallet is BaseAccount, Initializable {
     address public immutable walletFactory;
     IEntryPoint private immutable _entryPoint;
     using ECDSA for bytes32;
     address[] public owners;
+
+    event WalletInitialized(IEntryPoint indexed entryPoint, address[] owners);
 
     constructor(IEntryPoint anEntryPoint, address ourWalletFactory) {
         _entryPoint = anEntryPoint;
@@ -41,5 +45,15 @@ contract Wallet is BaseAccount {
         }
         // If all signatures are valid (i.e., they all belong to the owners), return 0
         return 0;
+    }
+
+    function initialize(address[] memory initialOwners) public initializer {
+        _initialize(initialOwners);
+    }
+    
+    function _initialize(address[] memory initialOwners) internal {
+        require(initialOwners.length > 0, "no owners");
+        owners = initialOwners;
+        emit WalletInitialized(_entryPoint, initialOwners);
     }
 }
