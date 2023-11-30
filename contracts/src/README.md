@@ -7,6 +7,10 @@ The WalletFactory will be deploying new instances of a Proxy, instead of new ins
 In the future, if an upgrade is required - let's say Wallet2 - we deploy the new Wallet2 contract to the network once, and have users upgrade their proxy to now point to Wallet2 as the implementation instead of Wallet.
 
 ## Wallet Contract
+
+### Creating the BaseAccount
+
+We can start by creating a constructor:
 ```
 import {IEntryPoint} from "account-abstraction/interfaces/IEntryPoint.sol";
 
@@ -92,3 +96,30 @@ This function:
 
 5. Verifies if the recovered address belongs to the correct owners. If not, it returns **SIG_VALIDATION_FAILED**, which is the failure code that the EntryPoint contract expects when signatures fail. This variable is declared in **BaseAccount**.
 
+### Initializing the Proxy Contract
+
+Since our Wallet is going to serve as the implementation contract for individual Proxy instances deployed through the WalletFactory, we need to add an initializer to set the owners (signers) of this wallet.
+
+To achieve this, we will inherit another contract, Initializable. This contract provides us with modifiers like initializer that ensure certain initialization functions only run once.
+
+```
+function initialize(address[] memory initialOwners) public initializer {
+    _initialize(initialOwners);
+}
+
+function _initialize(address[] memory initialOwners) internal {
+    require(initialOwners.length > 0, "no owners");
+    owners = initialOwners;
+    emit WalletInitialized(_entryPoint, initialOwners);
+}
+```
+
+- **initialize**: This public function has a modifier **initializer**. This modifier ensures that the initialize function can only be called once.
+
+- **_initialize**: This internal function is called from **initialize**. It sets the **owners** and emits the **WalletInitialized** event.
+
+### Executing Transactions
+
+Now, to get started with executing transactions through our smart account - we need to implement **execute** and **executeBatch**. **execute** will be used for executing a single call, whereas **executeBatch** can execute multiple together in a single transaction - to help with things like doing **approve** and *transferFrom* in a single transaction for swapping on a DEX.
+
+Before we write these functions, we need a helper function to make arbitrary function calls through our smart account. We can use the low-level .call(...) method in Solidity for this. Let's create a helper function that also handles errors properly:

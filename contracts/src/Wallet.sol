@@ -25,6 +25,10 @@ contract Wallet is BaseAccount, Initializable {
         return _entryPoint;
     }
 
+    function initialize(address[] memory initialOwners) public initializer {
+        _initialize(initialOwners);
+    }
+
     function _validateSignature(
         UserOperation calldata userOp, // UserOperation data structure passed as input
         bytes32 userOpHash // Hash of the UserOperation without the signatures
@@ -45,10 +49,6 @@ contract Wallet is BaseAccount, Initializable {
         }
         // If all signatures are valid (i.e., they all belong to the owners), return 0
         return 0;
-    }
-
-    function initialize(address[] memory initialOwners) public initializer {
-        _initialize(initialOwners);
     }
     
     function _initialize(address[] memory initialOwners) internal {
