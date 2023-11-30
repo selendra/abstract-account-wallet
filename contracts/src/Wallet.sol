@@ -3,12 +3,18 @@ pragma solidity ^0.8.12;
 
 import {IEntryPoint} from "account-abstraction/interfaces/IEntryPoint.sol";
 import {BaseAccount} from "account-abstraction/core/BaseAccount.sol";
-import {UserOperation} from "account-abstraction/interfaces/UserOperation.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {TokenCallbackHandler} from "account-abstraction/samples/callback/TokenCallbackHandler.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {TokenCallbackHandler} from "account-abstraction/samples/callback/TokenCallbackHandler.sol";
+import {UserOperation} from "account-abstraction/interfaces/UserOperation.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-contract Wallet is BaseAccount, Initializable {
+contract Wallet is
+    BaseAccount,
+    Initializable,
+    UUPSUpgradeable,
+    TokenCallbackHandler
+{ 
     address public immutable walletFactory;
     IEntryPoint private immutable _entryPoint;
     using ECDSA for bytes32;
@@ -57,6 +63,27 @@ contract Wallet is BaseAccount, Initializable {
         _initialize(initialOwners);
     }
 
+    function _authorizeUpgrade(
+        address
+    ) internal view override _requireFromEntryPointOrFactory {}
+
+    function _call(address target, uint256 value, bytes memory data) internal {
+        (bool success, bytes memory result) = target.call{value: value}(data);
+        if (!success) {
+            assembly {
+                // The assembly code here skips the first 32 bytes of the result, which contains the length of data.
+                // It then loads the actual error message using mload and calls revert with this error message.
+                revert(add(result, 32), mload(result))
+            }
+        }
+    }
+
+    function _initialize(address[] memory initialOwners) internal {
+        require(initialOwners.length > 0, "no owners");
+        owners = initialOwners;
+        emit WalletInitialized(_entryPoint, initialOwners);
+    }
+
     function _validateSignature(
         UserOperation calldata userOp, // UserOperation data structure passed as input
         bytes32 userOpHash // Hash of the UserOperation without the signatures
@@ -77,22 +104,5 @@ contract Wallet is BaseAccount, Initializable {
         }
         // If all signatures are valid (i.e., they all belong to the owners), return 0
         return 0;
-    }
-    
-    function _initialize(address[] memory initialOwners) internal {
-        require(initialOwners.length > 0, "no owners");
-        owners = initialOwners;
-        emit WalletInitialized(_entryPoint, initialOwners);
-    }
-
-    function _call(address target, uint256 value, bytes memory data) internal {
-        (bool success, bytes memory result) = target.call{value: value}(data);
-        if (!success) {
-            assembly {
-                // The assembly code here skips the first 32 bytes of the result, which contains the length of data.
-                // It then loads the actual error message using mload and calls revert with this error message.
-                revert(add(result, 32), mload(result))
-            }
-        }
     }
 }

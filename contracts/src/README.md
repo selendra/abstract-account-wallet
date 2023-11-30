@@ -123,3 +123,79 @@ function _initialize(address[] memory initialOwners) internal {
 Now, to get started with executing transactions through our smart account - we need to implement **execute** and **executeBatch**. **execute** will be used for executing a single call, whereas **executeBatch** can execute multiple together in a single transaction - to help with things like doing **approve** and *transferFrom* in a single transaction for swapping on a DEX.
 
 Before we write these functions, we need a helper function to make arbitrary function calls through our smart account. We can use the low-level .call(...) method in Solidity for this. Let's create a helper function that also handles errors properly:
+
+```
+function _call(address target, uint256 value, bytes memory data) internal {
+        (bool success, bytes memory result) = target.call{value: value}(data);
+        if (!success) {
+            assembly {
+                // The assembly code here skips the first 32 bytes of the result, which contains the length of data.
+                // It then loads the actual error message using mload and calls revert with this error message.
+                revert(add(result, 32), mload(result))
+            }
+        }
+    }
+```
+
+In this function, we call the built-in **call** function within the EVM. This function is called with the address of the contract that needs to be called, the amount of ether (**value**), and the **data** which contains the function signatures and any associated arguments.
+
+Next, we need to create a modifier to ensure that **execute** and **executeBatch** are only called from either the **EntryPoint** contract or the **WalletFactory** (which is used to deploy the wallet). 
+
+By ensuring that **EntryPoint** is the middleman for all transactions, we ensure that signature validation has taken place since the **EntryPoint** will validate signatures first before proceeding with the transaction. This is the case is 99% of the cases - except for one - the first ever transaction.
+
+The first ever transaction is also the one where the contract itself will be deployed for the first time through the **initCode** value passed by the **EntryPoint** to the **WalletFactory**. Therefore, it will be the **WalletFactory** which will be calling the functions - so we need to allow that as well.
+
+```
+modifier _requireFromEntryPointOrFactory() {
+    require(
+        msg.sender == address(_entryPoint) || msg.sender == walletFactory,
+        "only entry point or wallet factory can call"
+    );
+    _;
+}
+```
+
+Now, let's finally write the execute and executeBatch functions:
+```
+function execute(
+    address dest,
+    uint256 value,
+    bytes calldata func
+) external _requireFromEntryPointOrFactory {
+    _call(dest, value, func);
+}
+
+function executeBatch(
+    address[] calldata dests,
+    uint256[] calldata values,
+    bytes[] calldata funcs
+) external _requireFromEntryPointOrFactory {
+    require(dests.length == funcs.length, "wrong dests lengths");
+    require(values.length == funcs.length, "wrong values lengths");
+    for (uint256 i = 0; i < dests.length; i++) {
+        _call(dests[i], values[i], funcs[i]);
+    }
+}
+```
+
+Upgradeability and Token Types
+
+Since **Wallet** is the implementation contract for an upgradeable **Proxy**, it should be aware of this and have a function to authorize upgrades to a future improved implementation contract. Additionally, our account should be able to handle tokens other than the native token ETH, such as ERC20s, ERC721s, ERC1155s, and so on.
+
+To accommodate these functionalities, we need to import **UUPSUpgradeable** and **TokenCallbackHandler**. The Z** contract allows for upgradeability, while **TokenCallbackHandler** enables handling of various token types.
+
+Here's how to do it:
+
+```
+import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import {TokenCallbackHandler} from "account-abstraction/samples/callback/TokenCallbackHandler.sol";
+
+```
+
+For **UUPSUpgradeable**, we also need to override the **_authorizeUpgrade** function so that the upgrade can only happen through **WalletFactory** or **EntryPoint**.
+
+```
+function _authorizeUpgrade(
+        address
+    ) internal view override _requireFromEntryPointOrFactory {}
+```
