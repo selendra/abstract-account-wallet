@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.12;
 
 import {IEntryPoint} from "account-abstraction/interfaces/IEntryPoint.sol";
 import {BaseAccount} from "account-abstraction/core/BaseAccount.sol";
@@ -16,6 +16,14 @@ contract Wallet is BaseAccount, Initializable {
 
     event WalletInitialized(IEntryPoint indexed entryPoint, address[] owners);
 
+    modifier _requireFromEntryPointOrFactory() {
+        require(
+            msg.sender == address(_entryPoint) || msg.sender == walletFactory,
+            "only entry point or wallet factory can call"
+        );
+        _;
+    }
+
     constructor(IEntryPoint anEntryPoint, address ourWalletFactory) {
         _entryPoint = anEntryPoint;
         walletFactory = ourWalletFactory;
@@ -23,6 +31,26 @@ contract Wallet is BaseAccount, Initializable {
 
     function entryPoint() public view override returns (IEntryPoint) {
         return _entryPoint;
+    }
+
+    function execute(
+        address dest,
+        uint256 value,
+        bytes calldata func
+    ) external _requireFromEntryPointOrFactory {
+        _call(dest, value, func);
+    }
+    
+    function executeBatch(
+        address[] calldata dests,
+        uint256[] calldata values,
+        bytes[] calldata funcs
+    ) external _requireFromEntryPointOrFactory {
+        require(dests.length == funcs.length, "wrong dests lengths");
+        require(values.length == funcs.length, "wrong values lengths");
+        for (uint256 i = 0; i < dests.length; i++) {
+            _call(dests[i], values[i], funcs[i]);
+        }
     }
 
     function initialize(address[] memory initialOwners) public initializer {
@@ -55,5 +83,16 @@ contract Wallet is BaseAccount, Initializable {
         require(initialOwners.length > 0, "no owners");
         owners = initialOwners;
         emit WalletInitialized(_entryPoint, initialOwners);
+    }
+
+    function _call(address target, uint256 value, bytes memory data) internal {
+        (bool success, bytes memory result) = target.call{value: value}(data);
+        if (!success) {
+            assembly {
+                // The assembly code here skips the first 32 bytes of the result, which contains the length of data.
+                // It then loads the actual error message using mload and calls revert with this error message.
+                revert(add(result, 32), mload(result))
+            }
+        }
     }
 }
