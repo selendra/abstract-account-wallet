@@ -35,6 +35,14 @@ contract Wallet is
         walletFactory = ourWalletFactory;
     }
 
+    receive() external payable {}
+
+    function encodeSignatures(
+        bytes[] memory signatures
+    ) public pure returns (bytes memory) {
+        return abi.encode(signatures);
+    }
+
     function entryPoint() public view override returns (IEntryPoint) {
         return _entryPoint;
     }
@@ -57,6 +65,14 @@ contract Wallet is
         for (uint256 i = 0; i < dests.length; i++) {
             _call(dests[i], values[i], funcs[i]);
         }
+    }
+
+    function getDeposit() public view returns (uint256) {
+        return entryPoint().balanceOf(address(this));
+    }
+
+    function addDeposit() public payable {
+        entryPoint().depositTo{value: msg.value}(address(this));
     }
 
     function initialize(address[] memory initialOwners) public initializer {

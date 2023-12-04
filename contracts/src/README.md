@@ -199,3 +199,38 @@ function _authorizeUpgrade(
         address
     ) internal view override _requireFromEntryPointOrFactory {}
 ```
+
+## Helper Functions
+
+```
+function encodeSignatures(
+
+    bytes[] memory signatures
+
+) public pure returns (bytes memory) {
+
+    return abi.encode(signatures);
+
+}
+
+function getDeposit() public view returns (uint256) {
+    return entryPoint().balanceOf(address(this));
+}
+
+function addDeposit() public payable {
+    entryPoint().depositTo{value: msg.value}(address(this));
+}
+
+receive() external payable {}
+```
+
+
+Here's what each function does:
+
+- encodeSignatures: This function encodes the signatures into a bytes array, which can be used to pass as data when making calls to the contract.
+
+- getDeposit: This function checks the balance of the Wallet within EntryPoint.
+
+- addDeposit: This function adds a deposit for Wallet in EntryPoint.
+
+- receive: This function allows the contract to accept Native Coin.
