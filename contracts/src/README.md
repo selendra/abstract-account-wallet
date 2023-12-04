@@ -200,7 +200,7 @@ function _authorizeUpgrade(
     ) internal view override _requireFromEntryPointOrFactory {}
 ```
 
-## Helper Functions
+### Helper Functions
 
 ```
 function encodeSignatures(
@@ -234,3 +234,153 @@ Here's what each function does:
 - addDeposit: This function adds a deposit for Wallet in EntryPoint.
 
 - receive: This function allows the contract to accept Native Coin.
+
+## WalletFactory
+
+WeThe final contract we need to write is **WalletFactory**, which will be used to deploy and create a new **Wallet.sol**.
+
+```
+import {IEntryPoint} from "account-abstraction/interfaces/IEntryPoint.sol";
+import {Wallet} from "./Wallet.sol";
+
+contract WalletFactory {
+    Wallet public immutable walletImplementation;
+
+    constructor(IEntryPoint entryPoint) {
+        walletImplementation = new Wallet(entryPoint, address(this));
+    }
+}
+```
+
+In this contract, we've created a constructor that accepts the **EntryPoint** contract as an argument and initializes **walletImplementation**, which is of type **Wallet**.
+
+Next, we'll write a function to deploy a new **Wallet** proxy. The reason we deploy a proxy instead of the **Wallet** contract itself is to separate the implementation from the contract that actually stores the data. This way, if we want to change the implementation **(Wallet)** in the future, we can do so without affecting the stored data. The final contract address that the EntryPoint address has to call will also remain the same (which would be the proxy).
+
+First, let's import ERC1967Proxy, an implementation of a proxy that can take in an upgradeable implementation contract. This is provided by OpenZeppelin:
+
+```
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+```
+
+To generate the counterfactual address, we use the CREATE2 EVM opcode. OpenZeppelin provides us with a helper contract to use CREATE2, so let's import that as well
+
+```
+import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";
+
+```
+
+Now, let's write the getAddress function, which will return the counterfactual address for a to-be-deployed contract:
+
+```
+function getAddress(
+    address[] memory owners,
+    uint256 salt
+) public view returns (address) {
+    // Encode the initialize function in our wallet with the owners array as an argument into a bytes array
+    bytes memory walletInit = abi.encodeCall(Wallet.initialize, owners);
+    // Encode the proxyContract's constructor arguments which include the address walletImplementation and the walletInit
+    bytes memory proxyConstructor = abi.encode(
+        address(walletImplementation),
+        walletInit
+    );
+    // Encode the creation code for ERC1967Proxy along with the encoded proxyConstructor data
+    bytes memory bytecode = abi.encodePacked(
+        type(ERC1967Proxy).creationCode,
+        proxyConstructor
+    );
+    // Compute the keccak256 hash of the bytecode generated
+    bytes32 bytecodeHash = keccak256(bytecode);
+    // Use the hash and the salt to compute the counterfactual address of the proxy
+    return Create2.computeAddress(bytes32(salt), bytecodeHash);
+}
+```
+
+Our function takes in a **salt** and the list of the owners of this **Wallet**. It then calculates **walletInit**   which is the calldata for the initialize function in our Wallet contract. Then, it calculates **proxyConstructor** which is the calldata for the constructor for the proxy we will deploy. Then, we calculate bytecode which is the deployment bytecode for the proxy - i.e. contains the code + the constructor calldata. Finally, we calculate the **bytecodeHash** and then use that hash with the salt to compute the counterfactual address.
+
+create a function to actually create a new account
+
+```
+function createAccount(
+    address[] memory owners,
+    uint256 salt
+) external returns (Wallet) {
+    // Get the counterfactual address
+    address addr = getAddress(owners, salt);
+    // Check if the code at the counterfactual address is non-empty
+    uint256 codeSize = addr.code.length;
+    if (codeSize > 0) {
+        // If the code is non-empty, i.e. account already deployed, return the Wallet at the counterfactual address
+        return Wallet(payable(addr));
+    }
+
+    // If the code is empty, deploy a new Wallet
+    bytes memory walletInit = abi.encodeCall(Wallet.initialize, owners);
+    ERC1967Proxy proxy = new ERC1967Proxy{salt: bytes32(salt)}(
+        address(walletImplementation),
+        walletInit
+    );
+
+    // Return the newly deployed Wallet
+    return Wallet(payable(address(proxy)));
+}
+```
+
+Now here we first call **getAddress** to get the counterfactual address. Then we verify if the contract already exists by checking the code size and if that's the case, we just return the proxy contract at that address. If that is not the case, we deploy a new proxy contract.
+
+First, we create the **walletInit**  which encodes the initialize function within the **Wallet** implementation with the owners. Then we use salt which is used to ensure a predictable and unique address for the proxy contract and send in the arguments for the proxy's constructor which include the address of the wallet implementation along with **walletInit**
+
+# Deploying the Contracts
+
+Let's begin by deploying the WalletFactory. To do this, you'll need to make the following modifications to your **foundry.toml** file
+
+```
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+
+[rpc_endpoints]
+testnet = "${RPC_URL}"
+```
+
+Create a .env file within our contracts folder and add the following variables:
+
+```
+RPC_URL=YOUR_RPC_URL
+PRIVATE_KEY=0x...
+```
+
+Now, we need to write a Foundry script to deploy the contract. In your contracts/script folder, create a new file named WalletFactory.s.sol and add the following code:
+
+```
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.12;
+
+import "forge-std/Script.sol";
+import "../src/WalletFactory.sol";
+import {IEntryPoint} from "account-abstraction/interfaces/IEntryPoint.sol";
+
+contract WalletFactoryScript is Script {
+    // Address of the EntryPoint contract on Goerli
+    IEntryPoint constant ENTRYPOINT =
+        IEntryPoint(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789);
+
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY"); // Fetch the private key from environment variables
+        vm.startBroadcast(deployerPrivateKey); // Start broadcasting transactions
+
+        WalletFactory walletFactory = new WalletFactory(ENTRYPOINT); // Initialize the WalletFactory contract
+
+        vm.stopBroadcast(); // Stop broadcasting transactions
+    }
+}
+```
+
+Execute the following commands to deploy contract
+
+```
+source .env
+forge script script/WalletFactory.s.sol --rpc-url testnet
+```
+
+See your **WalletFactory** address in the **contracts/broadcast** folder under WalletFactory.s.sol/run-latest.json.
