@@ -182,7 +182,7 @@ Upgradeability and Token Types
 
 Since **Wallet** is the implementation contract for an upgradeable **Proxy**, it should be aware of this and have a function to authorize upgrades to a future improved implementation contract. Additionally, our account should be able to handle tokens other than the native token ETH, such as ERC20s, ERC721s, ERC1155s, and so on.
 
-To accommodate these functionalities, we need to import **UUPSUpgradeable** and **TokenCallbackHandler**. The Z** contract allows for upgradeability, while **TokenCallbackHandler** enables handling of various token types.
+To accommodate these functionalities, we need to import **UUPSUpgradeable** and **TokenCallbackHandler**. The **UUPSUpgradeable** allows for upgradeability, while **TokenCallbackHandler** enables handling of various token types.
 
 Here's how to do it:
 
