@@ -1,10 +1,15 @@
-import { HardhatUserConfig, task } from "hardhat/config";
 import * as dotenv from "dotenv";
-import "@nomicfoundation/hardhat-toolbox";
-import "hardhat-gas-reporter";
-import "@typechain/hardhat";
 
-const walletUtils = require("./walletUtils");
+import { HardhatUserConfig, task } from "hardhat/config";
+
+import "@nomiclabs/hardhat-etherscan";
+import "@nomiclabs/hardhat-waffle";
+import "@typechain/hardhat";
+import "hardhat-gas-reporter";
+import "solidity-coverage";
+import "hardhat-deploy";
+import "@nomiclabs/hardhat-ethers";
+import "hardhat-dependency-compiler";
 
 dotenv.config();
 
@@ -18,10 +23,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 });
 
-const hardhatAccounts =
-  process.env.PRIVATE_KEY !== undefined
-    ? [process.env.PRIVATE_KEY]
-    : walletUtils.makeKeyList();
+const hardhatAccounts = process.env.PRIVATE_KEY || ''
 
 const config: HardhatUserConfig = {
   paths: {
@@ -44,12 +46,12 @@ const config: HardhatUserConfig = {
     selendra: {
       url: process.env.SELENDRA_URL || "",
       chainId: 1961,
-      accounts: hardhatAccounts,
+      accounts: [hardhatAccounts],
     },
     testnet: {
       url: process.env.TESTNET_URL || "",
       chainId: 1953,
-      accounts: hardhatAccounts,
+      accounts: [hardhatAccounts],
     },
   },
 
