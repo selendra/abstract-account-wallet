@@ -1,5 +1,0 @@
-{
-  "devDependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.2.3"
-  }
-}
