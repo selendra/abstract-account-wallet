@@ -25,3 +25,14 @@ export const DEPLOYMENT_GAS_PRICES: Record<
     1961: { gasPrice: parseUnits("1", "gwei") },
     1953: { gasPrice: parseUnits("1", "gwei") },
 }
+
+export const paymasterStakeConfig: Record<number, StakingConfig> = {
+    1961: {
+      unstakeDelayInSec: 60 * 60 * 24, // 1 Day
+      stakeInWei: parseEther("1"),
+    },
+    1953: {
+      unstakeDelayInSec: 60 * 60 * 24, // 1 Day
+      stakeInWei: parseEther("1"),
+    },
+}

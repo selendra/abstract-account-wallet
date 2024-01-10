@@ -6,6 +6,7 @@
   "scripts": {
     "clean": "npx hardhat clean",
     "build": "npm run clean && npx hardhat compile",
+    "deploy:testnet": "npx npx hardhat run scripts/deploy.ts --network testnet",
     "test": "npx hardhat test",
     "bundler-test": "./scripts/bundler-tests.sh",
     "lint:ts": "npx eslint 'test/**/*.ts' 'scripts/**/*.ts'",
