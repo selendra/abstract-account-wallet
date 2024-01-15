@@ -1,5 +1,5 @@
 
-import { ethers, run } from "hardhat";
+import { ethers } from "hardhat";
 import { formatEther, isAddress } from "ethers/lib/utils";
 import { EntryPoint__factory, SmartAccountFactory__factory, VerifyingSingletonPaymaster__factory } from "../typechain";
 import { DEPLOYMENT_GAS_PRICES, factoryStakeConfig, paymasterStakeConfig } from "./config";
@@ -176,6 +176,20 @@ async function deploySmartContractOwnershipRegistryModule() {
   );
 }
 
+async function deployEcdsaOwnershipRegistryModule() {
+  await deployGeneric(
+    "EcdsaOwnershipRegistryModule",
+    []
+  );
+}
+
+async function deploySessionKeyManagerModule() {
+  await deployGeneric(
+    "SessionKeyManagerModule",
+    []
+  );
+}
+
 const verifyDeploymentConfig = () => {
   if (!isAddress(smartAccountFactoryOwnerAddress)) {
     throw new Error("Invalid Smart Account Factory Owner Address");
@@ -222,6 +236,8 @@ export async function mainDeploy(): Promise<Record<string, string>> {
   await deployVerifySingeltonPaymaster()
   await deployErc20SessionValidationModule()
   await deploySmartContractOwnershipRegistryModule()
+  await deployEcdsaOwnershipRegistryModule()
+  await deploySessionKeyManagerModule()
 
   console.log("=========================================");
 
