@@ -26,3 +26,7 @@ export enum ChainId {
     SELENDRA_MAINNET = 1961,
     SELENDRA_TESTNET = 1953,
 }
+
+export enum SmartAccountType {
+  BICONOMY,
+}
