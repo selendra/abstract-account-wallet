@@ -11,3 +11,5 @@ export const getTimestampInSeconds = (): number => {
 export const isNullOrUndefined = (value: string | number | bigint | BigNumber | Bytes | undefined): value is undefined => {
   return value === null || value === undefined;
 };
+
+export * from "./Utils";

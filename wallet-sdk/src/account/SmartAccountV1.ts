@@ -11,7 +11,7 @@ import {
   SmartAccountFactory_v100__factory,
   AddressResolver,
   AddressResolver__factory,
-  isNullOrUndefined
+  isNullOrUndefined,
 } from "../common";
 import {
   BiconomyTokenPaymasterRequest,
@@ -48,7 +48,7 @@ import {
 import log from "loglevel";
 
 type UserOperationKey = keyof UserOperation;
-export class SmartAccountV2 extends BaseSmartAccount {
+export class SmartAccountV1 extends BaseSmartAccount {
   private nodeClient!: INodeClient;
 
   private SENTINEL_MODULE = "0x0000000000000000000000000000000000000001";
@@ -82,18 +82,18 @@ export class SmartAccountV2 extends BaseSmartAccount {
   }
 
   /**
-   * Creates a new instance of SmartAccountV2.
+   * Creates a new instance of SmartAccountV1.
    *
-   * This method will create a SmartAccountV2 instance but will not deploy the Smart Account.
+   * This method will create a SmartAccountV1 instance but will not deploy the Smart Account.
    *
    * Deployment of the Smart Account will be donewith the first user operation.
    *
-   * @param biconomySmartAccountConfig - Configuration for initializing the SmartAccountV2 instance.
-   * @returns A promise that resolves to a new instance of SmartAccountV2.
+   * @param biconomySmartAccountConfig - Configuration for initializing the SmartAccountV1 instance.
+   * @returns A promise that resolves to a new instance of SmartAccountV1.
    * @throws An error if something is wrong with the smart account instance creation.
    */
-  public static async create(biconomySmartAccountConfig: BiconomySmartAccountV2Config): Promise<SmartAccountV2> {
-    const instance = new SmartAccountV2(biconomySmartAccountConfig);
+  public static async create(biconomySmartAccountConfig: BiconomySmartAccountV2Config): Promise<SmartAccountV1> {
+    const instance = new SmartAccountV1(biconomySmartAccountConfig);
     instance.factoryAddress = biconomySmartAccountConfig.factoryAddress ?? DEFAULT_SMART_WALLET_FACTORY_ADDRESS; // This would be fetched from V2
 
     if (biconomySmartAccountConfig.biconomyPaymasterApiKey) {
@@ -160,14 +160,14 @@ export class SmartAccountV2 extends BaseSmartAccount {
     return true;
   }
 
-  setActiveValidationModule(validationModule: BaseValidationModule): SmartAccountV2 {
+  setActiveValidationModule(validationModule: BaseValidationModule): SmartAccountV1 {
     if (validationModule instanceof BaseValidationModule) {
       this.activeValidationModule = validationModule;
     }
     return this;
   }
 
-  setDefaultValidationModule(validationModule: BaseValidationModule): SmartAccountV2 {
+  setDefaultValidationModule(validationModule: BaseValidationModule): SmartAccountV1 {
     if (validationModule instanceof BaseValidationModule) {
       this.defaultValidationModule = validationModule;
       this.accountAddress = undefined;

@@ -7,7 +7,7 @@ const debug = Debug("aa.utils");
 
 export const AddressZero = ethers.constants.AddressZero;
 
-export const EIP1559_UNSUPPORTED_NETWORKS: Array<ChainId> = [1961, 1953];
+export const EIP1559_UNSUPPORTED_NETWORKS: Array<ChainId> = [1953, 1961];
 
 // reverse "Deferrable" or "PromiseOrValue" fields
 /* eslint-disable  @typescript-eslint/no-explicit-any */
