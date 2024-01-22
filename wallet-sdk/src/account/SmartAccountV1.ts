@@ -277,7 +277,7 @@ export class SmartAccountV1 extends BaseSmartAccount {
       const desiredV1Account = result.find(
         (smartAccountInfo) =>
           smartAccountInfo.factoryVersion === "v1" &&
-          smartAccountInfo.currentVersion === "2.0.0" &&
+          smartAccountInfo.currentVersion === "1.0.0" &&
           smartAccountInfo.deploymentIndex.toNumber() === params.index,
       );
 
