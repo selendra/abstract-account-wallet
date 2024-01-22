@@ -1,0 +1,232 @@
+{
+  "socketService": {
+    "wssUrl": "wss://sdk-ws.prod.biconomy.io/connection/websocket",
+    "httpUrl": "https://sdk-ws.prod.biconomy.io/api"
+  },
+  "cacheService": {
+    "lockTTL": 10000
+  },
+  "supportedNetworks": [1953, 1961],
+  "EIP1559SupportedNetworks": [],
+  "supportedTransactionType": {
+    "1953": ["AA", "SCW"],
+    "1961": ["AA", "SCW"]
+  },
+  "chains": {
+    "currency": {
+      "1953": "TSEL",
+      "1961": "SEL"
+    },
+    "decimal": {
+      "1953": 18,
+      "1961": 18
+    },
+    "fallbackUrls": {},
+    "retryTransactionInterval": {
+      "1953": 100000,
+      "1961": 100000
+    }
+  },
+  "relayerManagers": [{
+    "name": "RM1",
+    "gasLimitMap": {
+      "0": 21000,
+      "1": 710000,
+      "2": 1700000
+    },
+    "minRelayerCount": {
+      "1953": 5,
+      "1961": 3
+    },
+    "maxRelayerCount": {
+      "1953": 25,
+      "1961": 5
+    },
+    "inactiveRelayerCountThreshold": {
+      "1953": 2,
+      "1961": 2
+    },
+    "pendingTransactionCountThreshold": {
+      "1953": 15,
+      "1961": 15
+    },
+    "fundingRelayerAmount": {
+      "1953": 0.1,
+      "1961": 0.5
+    },
+    "fundingBalanceThreshold": {
+      "1953": {
+        "type": "BigNumber",
+        "hex": "0x2386f26fc10000"
+      },
+      "1961": {
+        "type": "BigNumber",
+        "hex": "0x0429d069189e0000"
+      }
+    },
+    "newRelayerInstanceCount": {
+      "1953": 1,
+      "1961": 1
+    }
+  }],
+  "transaction": {
+    "errors": {
+      "networkResponseMessages": {
+        "ALREADY_KNOWN" : "already known",
+        "REPLACEMENT_UNDERPRICED" : "REPLACEMENT_UNDERPRICED",
+        "INSUFFICIENT_FUNDS": "insufficient funds for gas",
+        "INVALID_TRANSACTION": "submit transaction to pool failed"
+      },
+      "networksNonceError": {
+        "1953": "nonce too low",
+        "1961": "nonce too low"
+      },
+      "networksInsufficientFundsError": {
+        "1953": "insufficient funds for gas",
+        "1961": "insufficient funds for gas"
+      }
+    },
+    "retryCount": {
+      "FUNDING": {
+        "1953": 5,
+        "1961": 7
+      },
+      "AA": {
+        "1953": 5,
+        "1961": 7
+      },
+      "SCW": {
+        "1953": 5,
+        "1961": 7
+      },
+      "CROSS_CHAIN": {
+        "1953": 50,
+        "1961": 70
+      }
+    },
+    "bumpGasPriceMultiplier": {
+      "1953": 50,
+      "1961": 50
+    }
+  },
+  "gasPrice": {
+    "1953": {
+      "updateFrequencyInSeconds": 6,
+      "minGasPrice": 1000000000,
+      "maxGasPrice": 10000000000,
+      "baseFeeMultiplier": 1.1
+    },
+    "1961": {
+      "updateFrequencyInSeconds": 60,
+      "minGasPrice": 1000000000,
+      "maxGasPrice": 10000000000,
+      "baseFeeMultiplier": 1.1
+    }
+  },
+  "feeOption": {
+    "supportedFeeTokens": {
+      "1953": ["TSEL", "USDC", "USDT"],
+      "1961": ["SEL", "USDC", "USDT"]
+    },
+    "offset": {
+      "1953": {
+        "USDC": 1000000,
+        "USDT": 1000000
+      },
+      "1961": {
+        "USDC": 1000000,
+        "USDT": 1000000
+      }
+    },
+    "similarTokens": {
+      "1953": ["TSEL", "WETH"],
+      "1961": ["SEL", "WETH"]
+    },
+    "nativeChainIds": {
+      "WETH": 1
+    },
+    "logoUrl": {
+      "1953": {
+        "TSEL": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png",
+        "WETH": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png",
+        "USDC": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/usdc.png",
+        "USDT": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/usdt.png"
+      },
+      "1961": {
+        "SEL": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png",
+        "WETH": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/eth.png",
+        "USDC": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/usdc.png",
+        "USDT": "https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/usdt.png"
+      }
+    },
+    "tokenContractAddress": {
+      "1953": {
+        "TSEL": "0x0000000000000000000000000000000000000000",
+        "USDC": "0xb5B640E6414b6DeF4FC9B3C1EeF373925effeCcF",
+        "USDT": "0x64Ef393b6846114Bad71E2cB2ccc3e10736b5716",
+        "WETH": "0xb7e94Cce902E34e618A23Cb82432B95d03096146"
+      },
+      "1961": {
+        "SEL": "0x0000000000000000000000000000000000000000",
+        "USDC": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+        "USDT": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+        "WETH": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"
+      }
+    },
+    "decimals": {
+      "1953": {
+        "TSEL": 18,
+        "USDC": 6,
+        "USDT": 18,
+        "WETH": 18
+      },
+      "1961": {
+        "SEL": 18,
+        "USDC": 6,
+        "USDT": 6,
+        "WETH": 18
+      }
+    },
+    "feeTokenTransferGas": {
+      "1953": {
+        "TSEL": 7300,
+        "USDC": 22975,
+        "USDT": 22975,
+        "WETH": 22975
+      },
+      "1961": {
+        "SEL": 21000,
+        "USDC": 21000,
+        "USDT": 21000,
+        "WETH": 21000
+      }
+    },
+    "refundReceiver": {
+      "1953": "0x040a9cbC4453B0eeaE12f3210117B422B890C1ED",
+      "1961": "0x040a9cbC4453B0eeaE12f3210117B422B890C1ED"
+    },
+    "commission": {
+      "1953": 0,
+      "1961": 0
+    }
+  },
+  "tokenPrice": {
+    "networkSymbols": {
+      "TSEL": [421613, 42161],
+      "SEL": [421613, 42161]
+    },
+    "updateFrequencyInSeconds": 60,
+    "symbolMapByChainId": {
+      "1953": {
+        "0x6B175474E89094C44Da98b954EedeAC495271d0F": "DAI"
+      }
+    }
+  },
+  "entryPointData": {
+    "1953": [{
+      "abi": [{"inputs":[{"internalType":"uint256","name":"_paymasterStake","type":"uint256"},{"internalType":"uint32","name":"_unstakeDelaySec","type":"uint32"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"opIndex","type":"uint256"},{"internalType":"address","name":"paymaster","type":"address"},{"internalType":"string","name":"reason","type":"string"}],"name":"FailedOp","type":"error"},{"inputs":[{"internalType":"address","name":"aggregator","type":"address"}],"name":"SignatureValidationFailed","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":false,"internalType":"uint256","name":"totalDeposit","type":"uint256"}],"name":"Deposited","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":false,"internalType":"uint256","name":"totalStaked","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"withdrawTime","type":"uint256"}],"name":"StakeLocked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":false,"internalType":"uint256","name":"withdrawTime","type":"uint256"}],"name":"StakeUnlocked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":false,"internalType":"address","name":"withdrawAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"StakeWithdrawn","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"requestId","type":"bytes32"},{"indexed":true,"internalType":"address","name":"sender","type":"address"},{"indexed":true,"internalType":"address","name":"paymaster","type":"address"},{"indexed":false,"internalType":"uint256","name":"nonce","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"actualGasCost","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"actualGasPrice","type":"uint256"},{"indexed":false,"internalType":"bool","name":"success","type":"bool"}],"name":"UserOperationEvent","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"bytes32","name":"requestId","type":"bytes32"},{"indexed":true,"internalType":"address","name":"sender","type":"address"},{"indexed":false,"internalType":"uint256","name":"nonce","type":"uint256"},{"indexed":false,"internalType":"bytes","name":"revertReason","type":"bytes"}],"name":"UserOperationRevertReason","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"account","type":"address"},{"indexed":false,"internalType":"address","name":"withdrawAddress","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Withdrawn","type":"event"},{"inputs":[{"internalType":"uint32","name":"_unstakeDelaySec","type":"uint32"}],"name":"addStake","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"depositTo","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"deposits","outputs":[{"internalType":"uint112","name":"deposit","type":"uint112"},{"internalType":"bool","name":"staked","type":"bool"},{"internalType":"uint112","name":"stake","type":"uint112"},{"internalType":"uint32","name":"unstakeDelaySec","type":"uint32"},{"internalType":"uint64","name":"withdrawTime","type":"uint64"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"getDepositInfo","outputs":[{"components":[{"internalType":"uint112","name":"deposit","type":"uint112"},{"internalType":"bool","name":"staked","type":"bool"},{"internalType":"uint112","name":"stake","type":"uint112"},{"internalType":"uint32","name":"unstakeDelaySec","type":"uint32"},{"internalType":"uint64","name":"withdrawTime","type":"uint64"}],"internalType":"struct IStakeManager.DepositInfo","name":"info","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"components":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"nonce","type":"uint256"},{"internalType":"bytes","name":"initCode","type":"bytes"},{"internalType":"bytes","name":"callData","type":"bytes"},{"internalType":"uint256","name":"callGasLimit","type":"uint256"},{"internalType":"uint256","name":"verificationGasLimit","type":"uint256"},{"internalType":"uint256","name":"preVerificationGas","type":"uint256"},{"internalType":"uint256","name":"maxFeePerGas","type":"uint256"},{"internalType":"uint256","name":"maxPriorityFeePerGas","type":"uint256"},{"internalType":"bytes","name":"paymasterAndData","type":"bytes"},{"internalType":"bytes","name":"signature","type":"bytes"}],"internalType":"struct UserOperation","name":"userOp","type":"tuple"}],"name":"getRequestId","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes","name":"initCode","type":"bytes"}],"name":"getSenderAddress","outputs":[{"internalType":"address","name":"sender","type":"address"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"getSenderStorage","outputs":[{"internalType":"uint256[]","name":"senderStorageCells","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"components":[{"components":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"nonce","type":"uint256"},{"internalType":"bytes","name":"initCode","type":"bytes"},{"internalType":"bytes","name":"callData","type":"bytes"},{"internalType":"uint256","name":"callGasLimit","type":"uint256"},{"internalType":"uint256","name":"verificationGasLimit","type":"uint256"},{"internalType":"uint256","name":"preVerificationGas","type":"uint256"},{"internalType":"uint256","name":"maxFeePerGas","type":"uint256"},{"internalType":"uint256","name":"maxPriorityFeePerGas","type":"uint256"},{"internalType":"bytes","name":"paymasterAndData","type":"bytes"},{"internalType":"bytes","name":"signature","type":"bytes"}],"internalType":"struct UserOperation[]","name":"userOps","type":"tuple[]"},{"internalType":"contract IAggregator","name":"aggregator","type":"address"},{"internalType":"bytes","name":"signature","type":"bytes"}],"internalType":"struct IEntryPoint.UserOpsPerAggregator[]","name":"opsPerAggregator","type":"tuple[]"},{"internalType":"address payable","name":"beneficiary","type":"address"}],"name":"handleAggregatedOps","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"components":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"nonce","type":"uint256"},{"internalType":"bytes","name":"initCode","type":"bytes"},{"internalType":"bytes","name":"callData","type":"bytes"},{"internalType":"uint256","name":"callGasLimit","type":"uint256"},{"internalType":"uint256","name":"verificationGasLimit","type":"uint256"},{"internalType":"uint256","name":"preVerificationGas","type":"uint256"},{"internalType":"uint256","name":"maxFeePerGas","type":"uint256"},{"internalType":"uint256","name":"maxPriorityFeePerGas","type":"uint256"},{"internalType":"bytes","name":"paymasterAndData","type":"bytes"},{"internalType":"bytes","name":"signature","type":"bytes"}],"internalType":"struct UserOperation[]","name":"ops","type":"tuple[]"},{"internalType":"address payable","name":"beneficiary","type":"address"}],"name":"handleOps","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes","name":"callData","type":"bytes"},{"components":[{"components":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"nonce","type":"uint256"},{"internalType":"uint256","name":"callGasLimit","type":"uint256"},{"internalType":"uint256","name":"verificationGasLimit","type":"uint256"},{"internalType":"uint256","name":"preVerificationGas","type":"uint256"},{"internalType":"address","name":"paymaster","type":"address"},{"internalType":"uint256","name":"maxFeePerGas","type":"uint256"},{"internalType":"uint256","name":"maxPriorityFeePerGas","type":"uint256"}],"internalType":"struct EntryPoint.MemoryUserOp","name":"mUserOp","type":"tuple"},{"internalType":"bytes32","name":"requestId","type":"bytes32"},{"internalType":"uint256","name":"prefund","type":"uint256"},{"internalType":"uint256","name":"contextOffset","type":"uint256"},{"internalType":"uint256","name":"preOpGas","type":"uint256"}],"internalType":"struct EntryPoint.UserOpInfo","name":"opInfo","type":"tuple"},{"internalType":"bytes","name":"context","type":"bytes"}],"name":"innerHandleOp","outputs":[{"internalType":"uint256","name":"actualGasCost","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"paymasterStake","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"components":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"nonce","type":"uint256"},{"internalType":"bytes","name":"initCode","type":"bytes"},{"internalType":"bytes","name":"callData","type":"bytes"},{"internalType":"uint256","name":"callGasLimit","type":"uint256"},{"internalType":"uint256","name":"verificationGasLimit","type":"uint256"},{"internalType":"uint256","name":"preVerificationGas","type":"uint256"},{"internalType":"uint256","name":"maxFeePerGas","type":"uint256"},{"internalType":"uint256","name":"maxPriorityFeePerGas","type":"uint256"},{"internalType":"bytes","name":"paymasterAndData","type":"bytes"},{"internalType":"bytes","name":"signature","type":"bytes"}],"internalType":"struct UserOperation","name":"userOp","type":"tuple"},{"internalType":"bool","name":"offChainSigCheck","type":"bool"}],"name":"simulateValidation","outputs":[{"internalType":"uint256","name":"preOpGas","type":"uint256"},{"internalType":"uint256","name":"prefund","type":"uint256"},{"internalType":"address","name":"actualAggregator","type":"address"},{"internalType":"bytes","name":"sigForUserOp","type":"bytes"},{"internalType":"bytes","name":"sigForAggregation","type":"bytes"},{"internalType":"bytes","name":"offChainSigInfo","type":"bytes"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unlockStake","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"unstakeDelaySec","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address payable","name":"withdrawAddress","type":"address"}],"name":"withdrawStake","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address payable","name":"withdrawAddress","type":"address"},{"internalType":"uint256","name":"withdrawAmount","type":"uint256"}],"name":"withdrawTo","outputs":[],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}],
+      "address": "0x119df1582e0dd7334595b8280180f336c959f3bb"
+    }]
+  },
+  "zeroAddress": "0x0000000000000000000000000000000000000000"
+}
