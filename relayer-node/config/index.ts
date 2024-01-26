@@ -97,7 +97,7 @@ export class Config implements IConfig {
         throw new Error(`Network insufficient funds error required for chain id ${chainId}`);
       }
 
-      if (!this.config.entryPointData[chainId].length) {
+      if (!this.config.entryPointData[chainId]) {
         throw new Error(`Entry point data address required for chain id ${chainId}`);
       }
 
