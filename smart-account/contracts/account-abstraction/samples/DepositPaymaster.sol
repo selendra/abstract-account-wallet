@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.12;
 
 /* solhint-disable reason-string */
 
@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "../core/BasePaymaster.sol";
+import "../core/UserOperationLib.sol";
 import "./IOracle.sol";
 
 /**
@@ -60,9 +61,9 @@ contract DepositPaymaster is BasePaymaster {
      * @param amount the amount of token to deposit.
      */
     function addDepositFor(IERC20 token, address account, uint256 amount) external {
+        require(oracles[token] != NULL_ORACLE, "unsupported token");
         //(sender must have approval for the paymaster)
         token.safeTransferFrom(msg.sender, address(this), amount);
-        require(oracles[token] != NULL_ORACLE, "unsupported token");
         balances[token][account] += amount;
         if (msg.sender == account) {
             lockTokenDeposit();
@@ -150,18 +151,13 @@ contract DepositPaymaster is BasePaymaster {
      * this time in *postOpReverted* mode.
      * In this mode, we use the deposit to pay (which we validated to be large enough)
      */
-    function _postOp(PostOpMode mode, bytes calldata context, uint256 actualGasCost) internal override {
+    function _postOp(PostOpMode, bytes calldata context, uint256 actualGasCost) internal override {
 
         (address account, IERC20 token, uint256 gasPricePostOp, uint256 maxTokenCost, uint256 maxCost) = abi.decode(context, (address, IERC20, uint256, uint256, uint256));
         //use same conversion rate as used for validation.
         uint256 actualTokenCost = (actualGasCost + COST_OF_POST * gasPricePostOp) * maxTokenCost / maxCost;
-        if (mode != PostOpMode.postOpReverted) {
-            // attempt to pay with tokens:
-            token.safeTransferFrom(account, address(this), actualTokenCost);
-        } else {
-            //in case above transferFrom failed, pay with deposit:
-            balances[token][account] -= actualTokenCost;
-        }
+        // attempt to pay with tokens:
+        token.safeTransferFrom(account, address(this), actualTokenCost);
         balances[token][owner()] += actualTokenCost;
     }
 }

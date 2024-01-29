@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.12;
 import "../interfaces/IAccount.sol";
 import "../interfaces/IEntryPoint.sol";
-import "../core/EntryPoint.sol";
 
 contract MaliciousAccount is IAccount {
     IEntryPoint private ep;

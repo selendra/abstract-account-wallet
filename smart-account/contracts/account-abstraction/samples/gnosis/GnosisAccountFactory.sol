@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/utils/Create2.sol";
-import "../../../safe-contract/proxies/GnosisSafeProxyFactory.sol";
+import "@gnosis.pm/safe-contracts/contracts/proxies/GnosisSafeProxyFactory.sol";
 import "./EIP4337Manager.sol";
 
 /**
