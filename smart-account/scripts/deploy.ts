@@ -19,6 +19,13 @@ export async function deployGeneric(
   return contract.address;
 }
 
+async function deployMutiSendContract() {
+  entryPointAddress = await deployGeneric(
+    "MultiSend",
+    []
+  );
+}
+
 async function deployEntryPointContract() {
   entryPointAddress = await deployGeneric(
     "EntryPoint",
@@ -64,6 +71,7 @@ export async function mainDeploy(): Promise<Record<string, string>> {
   );
   console.log("=========================================");
 
+  await deployMutiSendContract()
   await deployEntryPointContract();
   await deployImplWalletFactoryContract();
   await deployWalletContract()
