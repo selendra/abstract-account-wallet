@@ -407,7 +407,14 @@ export abstract class BaseAccountAPI {
     const deployerAddress = initCode.substring(0, 42);
     const deployerCallData = '0x' + initCode.substring(42);
     const provider = this.services.walletService.getWalletProvider();
-    return await provider.estimateGas({ to: deployerAddress, data: deployerCallData });
+    
+    let estimateGas: BigNumber
+    try{
+      estimateGas = await provider.estimateGas({ to: deployerAddress, data: deployerCallData })
+    }catch{
+      estimateGas = BigNumber.from(0)
+    }
+    return estimateGas;
   }
 
   /**
@@ -429,10 +436,10 @@ export abstract class BaseAccountAPI {
       let feeData: any = {};
       try {
         feeData = await provider.getFeeData();
+
       } catch (err) {
         console.warn('getGas: eth_maxPriorityFeePerGas failed, falling back to legacy gas price.');
         const gas = await provider.getGasPrice();
-
         feeData = { maxFeePerGas: gas, maxPriorityFeePerGas: gas };
       }
       if (maxFeePerGas == null) {
