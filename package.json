@@ -1,0 +1,29 @@
+{
+  "name": "abstract-account-wallet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/selendra/abstract-account-wallet.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/selendra/abstract-account-wallet/issues"
+  },
+  "homepage": "https://github.com/selendra/abstract-account-wallet#readme",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.20.1"
+  },
+  "devDependencies": {
+    "@account-abstraction/contracts": "^0.6.0",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^4.2.0"
+  }
+}
