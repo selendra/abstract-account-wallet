@@ -12,7 +12,7 @@ contract Account is IAccount {
         owner = _owner;
     }
 
-    function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)
+    function validateUserOp(UserOperation calldata , bytes32, uint256) 
         external
         pure
         returns (uint256 validationData)
@@ -20,7 +20,8 @@ contract Account is IAccount {
         return 0;
     }
 
-    function execute() external {
+    // Time to count up!
+    function increment() external {
         count++;
     }
 }
