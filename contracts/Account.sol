@@ -17,7 +17,7 @@ contract Account is IAccount {
         pure
         returns (uint256 validationData)
     {
-        return 0;
+        return 0;  // without validate for testing
     }
 
     // Time to count up!

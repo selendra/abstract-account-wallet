@@ -2,8 +2,9 @@ import { ethers } from "hardhat";
 
 // Define constants for the factory contract's nonce and addresses
 const FACTORY_NONCE = 1;
-const FACTORY_ADDRESS = "0xBc2a0C5A658fAc6f3A3Fc2DCbC097D795D1C6BC3";
-const EP_ADDRESS = "0xCe097D88760e5F28b6C0b6e94F213dc659c07532";
+const FACTORY_ADDRESS = "0x4938b10472ad3e6430e2899cEf85Ca007d8BAd64";
+const EP_ADDRESS = "0x553F411e4920B8BB03C473B61124a76f9Fe157cb";
+const PM_ADRRES = "0xd2ce5cfBa6c1f039f2AcbD87260d22A23a8790E6";
 
 async function main() {
   // Retrieve the deployed EntryPoint contract
@@ -16,27 +17,27 @@ async function main() {
     nonce: FACTORY_NONCE,
   }); // Get the AccountFactory contract to encode its functions
 
-  console.log(`Sender Address ${sender}`)
+  console.log(`Sender Address ${sender}`);
 
   // Retrieve the first signer from the hardhat environment
   const [signer0] = await ethers.getSigners();
   // Get the address of the first signer
   const address0 = await signer0.getAddress();
 
-  //   // Prepare the initCode by combining the factory address with encoded createAccount function, removing the '0x' prefix
-  //   const initCode =
-  //     FACTORY_ADDRESS +
-  //     AccountFactory.interface
-  //       .encodeFunctionData("createAccount", [address0])
-  //       .slice(2); // Deposit funds to the sender account to cover transaction fees
+  // // Prepare the initCode by combining the factory address with encoded createAccount function, removing the '0x' prefix
+  // const initCode =
+  //   FACTORY_ADDRESS +
+  //   AccountFactory.interface
+  //     .encodeFunctionData("createAccount", [address0])
+  //     .slice(2); // Deposit funds to the sender account to cover transaction fees
 
   //if you want to run in secound time (_createSenderIfNeeded from entrypoint.sol)
   const initCode = "0x";
 
-//   // deposit prefund to entrypoint for execute via (stakemanger)
-//   await entryPoint.depositTo(sender, {
-//     value: ethers.parseEther("1"),
-//   }); // Define the user operation (userOp) with necessary details for execution
+  // // deposit prefund to entrypoint for execute via (stakemanger)
+  // await entryPoint.depositTo(PM_ADRRES, {
+  //   value: ethers.parseEther("100"),
+  // }); // Define the user operation (userOp) with necessary details for execution
 
   const userOp = {
     sender,
@@ -48,7 +49,7 @@ async function main() {
     preVerificationGas: 50_000,
     maxFeePerGas: ethers.parseUnits("10", "gwei"),
     maxPriorityFeePerGas: ethers.parseUnits("5", "gwei"),
-    paymasterAndData: "0x",
+    paymasterAndData: PM_ADRRES,
     signature: "0x",
   }; // Execute the user operation via the EntryPoint contract, passing the userOp and the fee receiver address
 
