@@ -1,0 +1,9 @@
+# IDE
+.vscode
+
+# Node directories
+.local
+
+# env files
+**/.env
+.env
