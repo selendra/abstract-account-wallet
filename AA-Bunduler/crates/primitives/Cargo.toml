@@ -1,0 +1,36 @@
+[package]
+name = "selendra-primitives"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+description = "Account abstraction (ERC-4337) primitive types"
+
+[dependencies]
+# eth
+alloy-chains = { workspace = true }
+ethers = { workspace = true }
+ssz_rs = { workspace = true }
+ssz_rs_derive = { workspace = true }
+
+# async
+async-stream = { workspace = true }
+futures-util = { workspace = true }
+
+# tokio
+tokio = { workspace = true }
+
+# misc
+derive_more = "0.99.17"
+rustc-hex = "2.1.0"
+serde-hex = "0.1.0"
+strum = "0.25.0"
+strum_macros = "0.25.3"
+expanded-pathbuf = { workspace = true }
+eyre = { workspace = true }
+lazy_static = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[features]
+test-utils = []
