@@ -17,3 +17,5 @@ main().catch((error) => {
     process.exitCode = 1;
   });
   
+
+//   npx hardhat run scripts/02.excecute.ts --network localhost

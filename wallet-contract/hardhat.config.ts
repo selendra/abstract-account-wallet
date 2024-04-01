@@ -5,6 +5,24 @@ require('dotenv').config()
 
 const ownerAccount = process.env.PRIVATE_KEY || ''
 
+import * as fs from 'fs'
+
+const mnemonicFileName = process.env.MNEMONIC_FILE ?? `${process.env.HOME}/.secret/testnet-mnemonic.txt`
+let mnemonic = 'test '.repeat(11) + 'junk'
+if (fs.existsSync(mnemonicFileName)) { mnemonic = fs.readFileSync(mnemonicFileName, 'ascii') }
+
+function getNetwork1 (url: string): { url: string, accounts: { mnemonic: string } } {
+  return {
+    url,
+    accounts: { mnemonic }
+  }
+}
+
+function getNetwork (name: string): { url: string, accounts: { mnemonic: string } } {
+  return getNetwork1(`https://${name}.infura.io/v3/${process.env.INFURA_ID}`)
+  // return getNetwork1(`wss://${name}.infura.io/ws/v3/${process.env.INFURA_ID}`)
+}
+
 const config: HardhatUserConfig = {
 	paths: {
 		artifacts: "artifacts",
@@ -23,8 +41,8 @@ const config: HardhatUserConfig = {
 		  },
 		],
 	  },
-	defaultNetwork: "local",
 	networks: {
+		dev: { url: 'http://localhost:8545' },
 		selendra: {
 		  url: "https://rpc0.selendra.org",
 		  chainId: 1961,
@@ -35,11 +53,7 @@ const config: HardhatUserConfig = {
 		  chainId: 1953,
 		  accounts: [ownerAccount],
 		},
-		local:{
-		  url: "http://127.0.0.1:8545",
-		  chainId: 1337,
-		  accounts: ["0x72a17daafae48f6ce5e3cad3e322a2a23c957af0fae555cdf890729fb08e4ed1", "0x29c04936d44dda2950d5e79b4ff74ea5af690f299ab89b026da3f77bb9392100"],
-		}
+		proxy: getNetwork1('http://localhost:8545')
 	},
 };
 
