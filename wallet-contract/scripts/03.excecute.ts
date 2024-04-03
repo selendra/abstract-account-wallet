@@ -4,9 +4,8 @@ import { ethers as bundler } from "ethers";
 // Define constants for the factory contract's nonce and addresses
 const FACTORY_NONCE = 1;
 const EP_ADDRESS = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
-const PM_ADRRES = "0xA104Aea188a793D0AD9e0FF97F81C330c683887d";
-const FACTORY_ADDRESS = "0x6A038C3c62F5905011713d9f758b907BbD8D1eBe";
-
+const PM_ADRRES = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+const FACTORY_ADDRESS = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
 
 async function main() {
   // Retrieve the deployed EntryPoint contract
@@ -14,33 +13,31 @@ async function main() {
   const AccountFactory = await ethers.getContractFactory("AccountFactory");
   const Account = await ethers.getContractFactory("Account");
 
-  const sender = ethers.getCreateAddress({
-    from: FACTORY_ADDRESS,
-    nonce: FACTORY_NONCE,
-  }); // Get the AccountFactory contract to encode its functions
-
-  console.log(`Sender Address ${sender}`);
-
   // Retrieve the first signer from the hardhat environment
-  const [signer0, signer1] = await ethers.getSigners();
+  const [signer0] = await ethers.getSigners();
   // Get the address of the first signer
   const address0 = await signer0.getAddress();
 
   // Prepare the initCode by combining the factory address with encoded createAccount function, removing the '0x' prefix
-  const initCode =
+  let initCode =
     FACTORY_ADDRESS +
     AccountFactory.interface
       .encodeFunctionData("createAccount", [address0])
       .slice(2); // Deposit funds to the sender account to cover transaction fees
 
-  // // //if you want to run in secound time (_createSenderIfNeeded from entrypoint.sol)
-  // // const initCode = "0x";
+  let sender: string = "";
+  try {
+    await entryPoint.getSenderAddress(initCode);
+  } catch (ex: any) {
+    sender = "0x" + ex.data.slice(-40);
+    console.log(sender);
+  }
 
-  // deposit prefund to entrypoint for execute via (stakemanger)
-  await entryPoint.depositTo(PM_ADRRES, {
-    value: ethers.parseEther("5"),
-    gasLimit: 300000,
-  }); // Define the user operation (userOp) with necessary details for execution
+  // check if acount have been create
+  const senderIsDeploy = await ethers.provider.getCode(sender);
+  if (senderIsDeploy !== "0x"){
+    initCode = "0x";
+  }
 
   const userOp: any = {
     sender,
@@ -53,37 +50,28 @@ async function main() {
     maxFeePerGas: String(ethers.parseUnits("10", "gwei")),
     maxPriorityFeePerGas: String(ethers.parseUnits("5", "gwei")),
     paymasterAndData: PM_ADRRES,
-    signature: "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c",
+    signature: "0x",
   }; // Execute the user operation via the EntryPoint contract, passing the userOp and the fee receiver address
 
-  const customHttpProvider = new bundler.JsonRpcProvider("http://127.0.0.1:3000");
+//   const customHttpProvider = new bundler.JsonRpcProvider("http://127.0.0.1:3000");
 
-  console.log(userOp)
+//   console.log(userOp)
 
-  const { preVerificationGas, verificationGasLimit, callGasLimit } =
-    await customHttpProvider.send("eth_estimateUserOperationGas", [
-      userOp,
-      EP_ADDRESS,
-    ]);
+//   const { preVerificationGas, verificationGasLimit, callGasLimit } =
+//     await customHttpProvider.send("eth_estimateUserOperationGas", [
+//       userOp,
+//       EP_ADDRESS,
+//     ]);
 
-  console.log(verificationGasLimit)
+//   console.log(verificationGasLimit)
 
-  // const userOpHash = await entryPoint.getUserOpHash(userOp);
+  const userOpHash = await entryPoint.getUserOpHash(userOp);
+  userOp.signature = signer0.signMessage(ethers.getBytes(userOpHash))
 
-  // userOp.signature = signer0.signMessage(ethers.getBytes(userOpHash))
+  const tx = await entryPoint.handleOps([userOp], address0);
+  const receipt = await tx.wait();
 
-  // const { maxFeePerGas } = await ethers.provider.getFeeData()
-
-  // console.log(maxFeePerGas)
-
-  
-
-  // const tx = await entryPoint.handleOps([userOp], address0);
-  // // Wait for the transaction to be confirmed
-  // const receipt = await tx.wait();
-
-//   // // Log the transaction receipt to the console
-//   console.log(receipt);
+  console.log(receipt);
 }
 
 // Execute the main function and handle any errors
