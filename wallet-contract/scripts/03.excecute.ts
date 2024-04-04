@@ -1,6 +1,8 @@
 import { ethers } from "hardhat";
 import { ethers as bundler } from "ethers";
 
+const bundlerProvider = new bundler.JsonRpcProvider("http://127.0.0.1:3000");
+
 // Define constants for the factory contract's nonce and addresses
 const FACTORY_NONCE = 1;
 const EP_ADDRESS = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
@@ -14,17 +16,17 @@ async function main() {
   const Account = await ethers.getContractFactory("Account");
 
   // Retrieve the first signer from the hardhat environment
-  const [signer0, signer1] = await ethers.getSigners();
+  const [signer0] = await ethers.getSigners();
   // Get the address of the first signer
   const address0 = await signer0.getAddress();
 
-  const address1 = await signer1.getAddress();
+  // const address1 = await signer1.getAddress();
 
   // Prepare the initCode by combining the factory address with encoded createAccount function, removing the '0x' prefix
   let initCode =
     FACTORY_ADDRESS +
     AccountFactory.interface
-      .encodeFunctionData("createAccount", [address1])
+      .encodeFunctionData("createAccount", [address0])
       .slice(2); // Deposit funds to the sender account to cover transaction fees
 
   let sender: string = "";
@@ -37,43 +39,57 @@ async function main() {
 
   // check if acount have been create
   const senderIsDeploy = await ethers.provider.getCode(sender);
-  if (senderIsDeploy !== "0x"){
+  if (senderIsDeploy !== "0x") {
     initCode = "0x";
   }
 
   const userOp: any = {
     sender,
-    nonce: (await entryPoint.getNonce(sender, 0)).toString(), // Fetching the current nonce for the sender
+    nonce: "0x" + (await entryPoint.getNonce(sender, 0)).toString(16),
     initCode,
     callData: Account.interface.encodeFunctionData("increment"), // Encoding the call to the increment function
-    callGasLimit: String(400_000),
-    verificationGasLimit: String(2_248_800),
-    preVerificationGas: String(100_000),
-    maxFeePerGas: String(ethers.parseUnits("10", "gwei")),
-    maxPriorityFeePerGas: String(ethers.parseUnits("5", "gwei")),
     paymasterAndData: PM_ADRRES,
-    signature: "0x",
+    signature: "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c",
   }; // Execute the user operation via the EntryPoint contract, passing the userOp and the fee receiver address
 
-//   const customHttpProvider = new bundler.JsonRpcProvider("http://127.0.0.1:3000");
+  
+  const { preVerificationGas, verificationGasLimit, callGasLimit } =
+    await bundlerProvider.send("eth_estimateUserOperationGas", [
+      userOp,
+      EP_ADDRESS,
+    ]);
 
-//   console.log(userOp)
+  userOp.callGasLimit = callGasLimit;
+  userOp.verificationGasLimit = verificationGasLimit;
+  userOp.preVerificationGas = preVerificationGas;
 
-//   const { preVerificationGas, verificationGasLimit, callGasLimit } =
-//     await customHttpProvider.send("eth_estimateUserOperationGas", [
-//       userOp,
-//       EP_ADDRESS,
-//     ]);
+  const { maxFeePerGas, maxPriorityFeePerGas } = await ethers.provider.getFeeData();
 
-//   console.log(verificationGasLimit)
+  userOp.maxFeePerGas = "0x" + maxFeePerGas?.toString(16);
+  userOp.maxPriorityFeePerGas = "0x" + maxPriorityFeePerGas?.toString(16);
 
   const userOpHash = await entryPoint.getUserOpHash(userOp);
-  userOp.signature = signer1.signMessage(ethers.getBytes(userOpHash))
+  userOp.signature = (await (signer0.signMessage(ethers.getBytes(userOpHash)))).toString();
 
-  const tx = await entryPoint.handleOps([userOp], address1);
-  const receipt = await tx.wait();
+  const opHash = await bundlerProvider.send("eth_sendUserOperation", [
+    userOp,
+    EP_ADDRESS,
+  ]);
 
-  console.log(receipt);
+  setTimeout(async () => {
+    const { transactionHash } = await bundlerProvider.send(
+      "eth_getUserOperationByHash",
+      [opHash]
+    );
+
+    console.log(transactionHash);
+  }, 8000);
+
+  // const tx = await entryPoint.handleOps([userOp], address0);
+  // const receipt = await tx.wait();
+
+  // console.log(opHash);
+
 }
 
 // Execute the main function and handle any errors

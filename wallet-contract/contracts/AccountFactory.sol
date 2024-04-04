@@ -5,10 +5,7 @@ import "./Account.sol";
 import "@openzeppelin/contracts/utils/Create2.sol";
 
 contract AccountFactory {
-    // A function to create a new Account contract instance with an assigned owner
     function createAccount(address owner) external returns (address) {
-        // Account acc = new Account(owner);
-        // return address(acc); // Returns the address of the newly created Account contract
         bytes32 salt = bytes32(uint256(uint160(owner)));
         bytes memory creationCode = type(Account).creationCode;
         bytes memory bytecode = abi.encodePacked(creationCode, abi.encode(owner));
@@ -19,6 +16,15 @@ contract AccountFactory {
             return addr;
         }
 
-        return Create2.deploy(0, salt, bytecode);
+        return deploy(salt, bytecode);
+    }
+
+    function deploy(bytes32 salt, bytes memory bytecode) internal returns (address addr) {
+        require(bytecode.length != 0, "Create2: bytecode length is zero");
+        /// @solidity memory-safe-assembly
+        assembly {
+            addr := create2(0, add(bytecode, 0x20), mload(bytecode), salt)
+        }
+        require(addr != address(0), "Create2: Failed on deploy");
     }
 }
