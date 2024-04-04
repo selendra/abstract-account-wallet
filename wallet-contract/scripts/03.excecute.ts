@@ -14,15 +14,17 @@ async function main() {
   const Account = await ethers.getContractFactory("Account");
 
   // Retrieve the first signer from the hardhat environment
-  const [signer0] = await ethers.getSigners();
+  const [signer0, signer1] = await ethers.getSigners();
   // Get the address of the first signer
   const address0 = await signer0.getAddress();
+
+  const address1 = await signer1.getAddress();
 
   // Prepare the initCode by combining the factory address with encoded createAccount function, removing the '0x' prefix
   let initCode =
     FACTORY_ADDRESS +
     AccountFactory.interface
-      .encodeFunctionData("createAccount", [address0])
+      .encodeFunctionData("createAccount", [address1])
       .slice(2); // Deposit funds to the sender account to cover transaction fees
 
   let sender: string = "";
@@ -66,9 +68,9 @@ async function main() {
 //   console.log(verificationGasLimit)
 
   const userOpHash = await entryPoint.getUserOpHash(userOp);
-  userOp.signature = signer0.signMessage(ethers.getBytes(userOpHash))
+  userOp.signature = signer1.signMessage(ethers.getBytes(userOpHash))
 
-  const tx = await entryPoint.handleOps([userOp], address0);
+  const tx = await entryPoint.handleOps([userOp], address1);
   const receipt = await tx.wait();
 
   console.log(receipt);
