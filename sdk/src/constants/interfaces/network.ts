@@ -1,4 +1,8 @@
-import { NetworkNames } from "..";
+export enum NetworkNames {
+  Selendra = "selendra",
+  SelendraTestnet = "selendraTestnet",
+  LocalDev = "LocalDev",
+}
 
 export interface Network {
   name: NetworkNames;
@@ -17,3 +21,4 @@ export interface NetworkConfig {
     paymentmaster: string | null;
   };
 }
+

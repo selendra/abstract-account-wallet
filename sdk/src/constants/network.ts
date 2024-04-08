@@ -1,10 +1,4 @@
-import { NetworkConfig } from ".";
-
-export enum NetworkNames {
-  Selendra = "selendra",
-  SelendraTestnet = "selendraTestnet",
-  LocalDev = "LocalDev",
-}
+import { NetworkConfig, NetworkNames } from ".";
 
 export const SupportedNetworks = [1961, 1953, 1337];
 
@@ -21,24 +15,24 @@ export const Networks: {
 } = {
   [1961]: {
     chainId: 1961,
-    provider: "Not supported yet",
-    bundler: "Not supported yet",
+    provider: "",
+    bundler: "",
     contracts: {
-      entryPoint: "Not supported yet",
+      entryPoint: "",
       walletFactory: {
-        simpleAccount: "Not supported yet",
+        simpleAccount: "",
       },
       paymentmaster: null,
     },
   },
   [1953]: {
     chainId: 1953,
-    provider: "Not supported yet",
-    bundler: "Not supported yet",
+    provider: "",
+    bundler: "",
     contracts: {
-      entryPoint: "Not supported yet",
+      entryPoint: "",
       walletFactory: {
-        simpleAccount: "Not supported yet",
+        simpleAccount: "",
       },
       paymentmaster: null,
     },
