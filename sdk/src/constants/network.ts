@@ -42,7 +42,7 @@ export const Networks: {
     provider: "http://127.0.0.1:8545",
     bundler: "http://127.0.0.1:3000",
     contracts: {
-      entryPoint: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      entryPoint: "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
       walletFactory: {
         simpleAccount: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
       },
