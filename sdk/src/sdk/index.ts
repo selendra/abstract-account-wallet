@@ -7,11 +7,6 @@ import { AccountFactory, getEntryPoint, Account } from "../constants/contract";
 export class SDK {
   readonly networkConfig: NetworkConfig
   readonly walletProvider: WalletProviderLike;
-  // public sender: string = '';
-  // public nonce: string = '';
-  // public callData: string = '';
-  // private initCode: string = ''
-  // private signature: string = '0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c';
   public userOps: UserOperationInterface = {
     sender: "0x0",
     nonce: "0x0",
@@ -64,11 +59,9 @@ export class SDK {
     try {
       await this.entryPoint().getSenderAddress(initCode)
     } catch (ex: any) {
-      console.log(ex)
       this.userOps.sender = "0x" + ex.data.slice(-40);
     }
     
-
     const senderIsDeploy = await this.provider().getCode(this.userOps.sender);
     if (senderIsDeploy !== "0x") {
       initCode = "0x";
@@ -95,30 +88,49 @@ export class SDK {
 
   async processUserOps() {
     await this.getInitCode();
-    // await this.getNonce();
-    // await this.getSignature();
-    // await this.getcallData("increment");
-    // await this.getpaymasterAndData();
+    await this.getNonce();
+    await this.getSignature();
+    await this.getcallData("increment");
+    await this.getpaymasterAndData();
   }
 
   async getEstimateUserOperationGas() {
-    await this.processUserOps()
-    const userOp = this.userOps;
-
-    console.log(userOp)
     
-    // const { preVerificationGas } =
-    // await this.bundler().send("eth_estimateUserOperationGas", [
-    //   userOp,
-    //   this.networkConfig.contracts.entryPoint,
-    // ]);
+    const { preVerificationGas, verificationGasLimit, callGasLimit } =
+    await this.bundler().send("eth_estimateUserOperationGas", [
+      this.userOps,
+      this.networkConfig.contracts.entryPoint,
+    ]);
 
-    // // userOp.callGasLimit = callGasLimit;
-    // // userOp.verificationGasLimit = verificationGasLimit;
-    // userOp.preVerificationGas = preVerificationGas;
+    this.userOps.callGasLimit = callGasLimit;
+    this.userOps.verificationGasLimit = verificationGasLimit;
+    this.userOps.preVerificationGas = preVerificationGas;
+    
+    const { maxFeePerGas, maxPriorityFeePerGas } = await this.provider().getFeeData();
 
-    // console.log(userOp)
+    this.userOps.maxFeePerGas = "0x" + maxFeePerGas?.toString(16);
+    this.userOps.maxPriorityFeePerGas = "0x" + maxPriorityFeePerGas?.toString(16);
 
+    const userOpHash = await this.entryPoint().getUserOpHash(this.userOps);
+    this.userOps.signature = (await (this.walletProvider.signMessage(ethers.getBytes(userOpHash)))).toString();
+  }
 
+  async getUserOperationByHash() {
+    await this.processUserOps()
+    await this.getEstimateUserOperationGas()
+
+    const opHash = await this.bundler().send("eth_sendUserOperation", [
+      this.userOps,
+      this.networkConfig.contracts.entryPoint,
+    ]);
+  
+    setTimeout(async () => {
+      const { transactionHash } = await this.bundler().send(
+        "eth_getUserOperationByHash",
+        [opHash]
+      );
+  
+      console.log(transactionHash);
+    }, 8000);
   }
 }

@@ -10,7 +10,7 @@ const sdk = new SDK(wallet, 1337);
 
 (async () => {
     try {
-        await sdk.getEstimateUserOperationGas();
+        await sdk.getUserOperationByHash();
     } catch (e) {
         // Deal with the fact the chain failed
     }

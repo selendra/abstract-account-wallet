@@ -5,7 +5,7 @@ const bundlerProvider = new bundler.JsonRpcProvider("http://127.0.0.1:3000");
 
 // Define constants for the factory contract's nonce and addresses
 const FACTORY_NONCE = 1;
-const EP_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const EP_ADDRESS = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
 const PM_ADRRES = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 const FACTORY_ADDRESS = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
 
