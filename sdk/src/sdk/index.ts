@@ -1,75 +1,124 @@
 import { ethers } from "ethers";
-import { FactoryType, getNetworkConfig } from "../constants";
+import {NetworkConfig, UserOperationInterface, getNetworkConfig } from "../constants";
 import { Exception } from "../errorHandler";
 import { WalletProviderLike } from "../wallet";
+import { AccountFactory, getEntryPoint, Account } from "../constants/contract";
 
-export class sdk {
-  readonly bundlerUrl: string;
-  readonly providerUrl: string;
-  readonly entryPoint: string;
-  readonly walletFactory: string;
-  readonly paymaster: string;
+export class SDK {
+  readonly networkConfig: NetworkConfig
+  readonly walletProvider: WalletProviderLike;
+  // public sender: string = '';
+  // public nonce: string = '';
+  // public callData: string = '';
+  // private initCode: string = ''
+  // private signature: string = '0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c';
+  public userOps: UserOperationInterface = {
+    sender: "0x0",
+    nonce: "0x0",
+    initCode: "0x0",
+    callData: "0x0",
+    paymasterAndData: "0x0",
+    signature: "0x0",
+    callGasLimit: "0x0",
+    verificationGasLimit: "0x0",
+    preVerificationGas: "0x0",
+    maxFeePerGas: "0x0",
+    maxPriorityFeePerGas: "0x0"
+  }
+
 
   constructor(
     walletProvider: WalletProviderLike,
     chainId: number,
-    factory: FactoryType
   ) {
+    this.walletProvider = walletProvider;
+
     const networkConfig = getNetworkConfig(chainId);
     if (!networkConfig) throw new Exception("network not found");
+    this.networkConfig = networkConfig
+  }
 
-    if (networkConfig.bundler == "")
-      throw new Exception("No bundler url provided");
-    this.bundlerUrl = networkConfig.bundler;
+  provider() {
+    return new ethers.JsonRpcProvider(this.networkConfig.provider);
+  }
 
-    if (networkConfig.provider == "")
-      throw new Exception("No provider url provided");
-    this.providerUrl = networkConfig.provider;
+  bundler() {
+    return new ethers.JsonRpcProvider(this.networkConfig.bundler);
+  }
 
-    if ((networkConfig.contracts.entryPoint = ""))
-      throw new Exception("No entryPoint address provided");
-    this.entryPoint = networkConfig.contracts.entryPoint;
+  wallet() {
+    return new ethers.Wallet(this.walletProvider.wallet?.privateKey || '', this.provider());
+  }
 
-    if (factory == FactoryType.SIMPLE_ACCOUNT) {
-      if ((networkConfig.contracts.walletFactory.simpleAccount = ""))
-        throw new Exception("No entryPoint address provided");
-      this.walletFactory = networkConfig.contracts.walletFactory.simpleAccount;
-    } else {
-      this.walletFactory = "";
+  entryPoint() {
+    return getEntryPoint(this.networkConfig.contracts.entryPoint, this.wallet())
+  }
+
+  async getInitCode() {
+    let initCode =
+      this.networkConfig.contracts.walletFactory.simpleAccount +
+      AccountFactory.interface
+        .encodeFunctionData("createAccount", [this.walletProvider.address])
+        .slice(2);
+
+    try {
+      await this.entryPoint().getSenderAddress(initCode)
+    } catch (ex: any) {
+      console.log(ex)
+      this.userOps.sender = "0x" + ex.data.slice(-40);
+    }
+    
+
+    const senderIsDeploy = await this.provider().getCode(this.userOps.sender);
+    if (senderIsDeploy !== "0x") {
+      initCode = "0x";
     }
 
-    this.paymaster = networkConfig.contracts.paymentmaster
-      ? networkConfig.contracts.paymentmaster
-      : "";
+    this.userOps.initCode = initCode
   }
 
-  async provider() {
-    return new ethers.JsonRpcProvider(this.providerUrl);
+  async getNonce() {
+    this.userOps.nonce = "0x" + (await this.entryPoint().getNonce(this.userOps.sender, 0)).toString(16)
   }
 
-  async bundler() {
-    return new ethers.JsonRpcProvider(this.bundlerUrl);
+  async getcallData(call: string) {
+    this.userOps.callData = Account.interface.encodeFunctionData(call)
   }
 
-  // async getInitCode() {
-  //   let initCode =
-  //     this.walletFactory +
-  //     AccountFactory.interface
-  //       .encodeFunctionData("createAccount", [address0])
-  //       .slice(2); // Deposit funds to the sender account to cover transaction fees
+  async getSignature() {
+    this.userOps.signature = "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c"
+  }
 
-  //   let sender: string = "";
-  //   try {
-  //     await entryPoint.getSenderAddress(initCode);
-  //   } catch (ex: any) {
-  //     sender = "0x" + ex.data.slice(-40);
-  //     console.log(sender);
-  //   }
+  async getpaymasterAndData() {
+    this.userOps.paymasterAndData = this.networkConfig.contracts.paymentmaster || "";
+  }
 
-  //   // check if acount have been create
-  //   const senderIsDeploy = await ethers.provider.getCode(sender);
-  //   if (senderIsDeploy !== "0x") {
-  //     initCode = "0x";
-  //   }
-  // }
+  async processUserOps() {
+    await this.getInitCode();
+    // await this.getNonce();
+    // await this.getSignature();
+    // await this.getcallData("increment");
+    // await this.getpaymasterAndData();
+  }
+
+  async getEstimateUserOperationGas() {
+    await this.processUserOps()
+    const userOp = this.userOps;
+
+    console.log(userOp)
+    
+    // const { preVerificationGas } =
+    // await this.bundler().send("eth_estimateUserOperationGas", [
+    //   userOp,
+    //   this.networkConfig.contracts.entryPoint,
+    // ]);
+
+    // // userOp.callGasLimit = callGasLimit;
+    // // userOp.verificationGasLimit = verificationGasLimit;
+    // userOp.preVerificationGas = preVerificationGas;
+
+    // console.log(userOp)
+
+
+  }
 }

@@ -17,7 +17,11 @@
   },
   "author": "Selendra",
   "license": "ISC",
+  "_moduleAliases": {
+    "@abi": "../wallet-contract/artifacts/contracts"
+  },
   "devDependencies": {
+    "@account-abstraction/contracts": "^0.6.0",
     "@types/node": "^20.12.4",
     "tsup": "^8.0.2",
     "typescript": "^5.4.4"
