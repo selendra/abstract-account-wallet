@@ -23,8 +23,12 @@ const config: HardhatUserConfig = {
 		  },
 		],
 	  },
-	defaultNetwork: "local",
+	defaultNetwork: "localhost",
 	networks: {
+		localhost: { 
+			url: 'http://localhost:8545',
+			accounts: ["0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", ownerAccount]
+		},
 		selendra: {
 		  url: "https://rpc0.selendra.org",
 		  chainId: 1961,
@@ -35,12 +39,8 @@ const config: HardhatUserConfig = {
 		  chainId: 1953,
 		  accounts: [ownerAccount],
 		},
-		local:{
-		  url: "http://127.0.0.1:8545",
-		  chainId: 1337,
-		  accounts: ["0x477920740e2083ab70e742147833ecb4eb4fed494513be276528620983d65057", "0x1a6e0d43e1bce6d016899c20e9a075f1f6df364ffe3bf76380a1b1e210c475fe"],
-		}
 	},
 };
 
 export default config;
+
