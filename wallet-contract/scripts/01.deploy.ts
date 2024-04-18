@@ -6,7 +6,7 @@ async function main() {
 	const [owner] = await ethers.getSigners();
 
 	const paymaster = await ethers.getContractFactory('Paymaster', owner);
-	const accountFactory = await ethers.getContractFactory('AccountFactory', owner);
+	const accountFactory = await ethers.getContractFactory('LightAccountFactory', owner);
 
 	const pm = await paymaster.deploy();
 	const af = await accountFactory.deploy(EP_ADDRESS) as any;
