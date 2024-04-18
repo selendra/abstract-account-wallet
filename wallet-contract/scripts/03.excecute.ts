@@ -28,11 +28,13 @@ async function main() {
     AccountFactory.interface
       .encodeFunctionData("createAccount", [address0])
       .slice(2); // Deposit funds to the sender account to cover transaction fees
+   console.log(initCode)
 
   let sender: string = "";
   try {
     await entryPoint.getSenderAddress(initCode);
   } catch (ex: any) {
+    console.log(ex.data)
     sender = "0x" + ex.data.slice(-40);
     console.log(sender);
   }
@@ -53,37 +55,37 @@ async function main() {
   }; // Execute the user operation via the EntryPoint contract, passing the userOp and the fee receiver address
 
   
-  const { preVerificationGas, verificationGasLimit, callGasLimit } =
-    await bundlerProvider.send("eth_estimateUserOperationGas", [
-      userOp,
-      EP_ADDRESS,
-    ]);
+  // const { preVerificationGas, verificationGasLimit, callGasLimit } =
+  //   await bundlerProvider.send("eth_estimateUserOperationGas", [
+  //     userOp,
+  //     EP_ADDRESS,
+  //   ]);
 
-  userOp.callGasLimit = callGasLimit;
-  userOp.verificationGasLimit = verificationGasLimit;
-  userOp.preVerificationGas = preVerificationGas;
+  // userOp.callGasLimit = callGasLimit;
+  // userOp.verificationGasLimit = verificationGasLimit;
+  // userOp.preVerificationGas = preVerificationGas;
 
-  const { maxFeePerGas, maxPriorityFeePerGas } = await ethers.provider.getFeeData();
+  // const { maxFeePerGas, maxPriorityFeePerGas } = await ethers.provider.getFeeData();
 
-  userOp.maxFeePerGas = "0x" + maxFeePerGas?.toString(16);
-  userOp.maxPriorityFeePerGas = "0x" + maxPriorityFeePerGas?.toString(16);
+  // userOp.maxFeePerGas = "0x" + maxFeePerGas?.toString(16);
+  // userOp.maxPriorityFeePerGas = "0x" + maxPriorityFeePerGas?.toString(16);
 
-  const userOpHash = await entryPoint.getUserOpHash(userOp);
-  userOp.signature = (await (signer0.signMessage(ethers.getBytes(userOpHash)))).toString();
+  // const userOpHash = await entryPoint.getUserOpHash(userOp);
+  // userOp.signature = (await (signer0.signMessage(ethers.getBytes(userOpHash)))).toString();
 
-  const opHash = await bundlerProvider.send("eth_sendUserOperation", [
-    userOp,
-    EP_ADDRESS,
-  ]);
+  // const opHash = await bundlerProvider.send("eth_sendUserOperation", [
+  //   userOp,
+  //   EP_ADDRESS,
+  // ]);
 
-  setTimeout(async () => {
-    const { transactionHash } = await bundlerProvider.send(
-      "eth_getUserOperationByHash",
-      [opHash]
-    );
+  // setTimeout(async () => {
+  //   const { transactionHash } = await bundlerProvider.send(
+  //     "eth_getUserOperationByHash",
+  //     [opHash]
+  //   );
 
-    console.log(transactionHash);
-  }, 8000);
+  //   console.log(transactionHash);
+  // }, 8000);
 
   // const tx = await entryPoint.handleOps([userOp], address0);
   // const receipt = await tx.wait();
