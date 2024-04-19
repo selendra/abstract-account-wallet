@@ -21,7 +21,7 @@ async function main() {
   // Get the address of the first signer
   const address0 = await signer0.getAddress();
 
-  const salt = "0x" + randomBytes(32).toString("hex");
+  const salt = "0x33e34b09d1f4ca3ab07f99aaadbd13af9a7bd9bf" //"0x" + randomBytes(32).toString("hex");
 
   // Prepare the initCode by combining the factory address with encoded createAccount function, removing the '0x' prefix
   let initCode =
@@ -44,50 +44,49 @@ async function main() {
     initCode = "0x";
   }
 
-  console.log(initCode)
-
-  // const userOp: any = {
-  //   sender,
-  //   nonce: "0x" + (await entryPoint.getNonce(sender, 0)).toString(16),
-  //   initCode,
-  //   callData: Account.interface.encodeFunctionData("increment"), // Encoding the call to the increment function
-  //   paymasterAndData: PM_ADRRES,
-  //   signature: "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c",
-  // }; // Execute the user operation via the EntryPoint contract, passing the userOp and the fee receiver address
+  const userOp: any = {
+    sender,
+    nonce: "0x" + (await entryPoint.getNonce(sender, 0)).toString(16),
+    initCode,
+    callData: Account.interface.encodeFunctionData("increment"), // Encoding the call to the increment function
+    paymasterAndData: PM_ADRRES,
+    signature: "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c",
+  }; // Execute the user operation via the EntryPoint contract, passing the userOp and the fee receiver address
 
   
-  // const { preVerificationGas, verificationGasLimit, callGasLimit } =
-  //   await bundlerProvider.send("eth_estimateUserOperationGas", [
-  //     userOp,
-  //     EP_ADDRESS,
-  //   ]);
+  const { preVerificationGas, verificationGasLimit, callGasLimit } =
+    await bundlerProvider.send("eth_estimateUserOperationGas", [
+      userOp,
+      EP_ADDRESS,
+    ]);
 
-  // userOp.callGasLimit = callGasLimit;
-  // userOp.verificationGasLimit = verificationGasLimit;
-  // userOp.preVerificationGas = preVerificationGas;
+  userOp.callGasLimit = callGasLimit;
+  userOp.verificationGasLimit = verificationGasLimit;
+  userOp.preVerificationGas = preVerificationGas;
 
-  // const { maxFeePerGas, maxPriorityFeePerGas } = await ethers.provider.getFeeData();
+  const { maxFeePerGas, maxPriorityFeePerGas } = await ethers.provider.getFeeData();
 
-  // userOp.maxFeePerGas = "0x" + maxFeePerGas?.toString(16);
-  // userOp.maxPriorityFeePerGas = "0x" + maxPriorityFeePerGas?.toString(16);
+  userOp.maxFeePerGas = "0x" + maxFeePerGas?.toString(16);
+  userOp.maxPriorityFeePerGas = "0x" + maxPriorityFeePerGas?.toString(16);
 
-  // const userOpHash = await entryPoint.getUserOpHash(userOp);
-  // userOp.signature = (await (signer0.signMessage(ethers.getBytes(userOpHash)))).toString();
+  const userOpHash = await entryPoint.getUserOpHash(userOp);
+  userOp.signature = (await (signer0.signMessage(ethers.getBytes(userOpHash)))).toString();
 
-  // const opHash = await bundlerProvider.send("eth_sendUserOperation", [
-  //   userOp,
-  //   EP_ADDRESS,
-  // ]);
+  console.log(userOp.signature)
 
-  // setTimeout(async () => {
-  //   const { transactionHash } = await bundlerProvider.send(
-  //     "eth_getUserOperationByHash",
-  //     [opHash]
-  //   );
+  const opHash = await bundlerProvider.send("eth_sendUserOperation", [
+    userOp,
+    EP_ADDRESS,
+  ]);
 
-  //   console.log(transactionHash);
-  // }, 8000);
+    setTimeout(async () => {
+    const { transactionHash } = await bundlerProvider.send(
+      "eth_getUserOperationByHash",
+      [opHash]
+    );
 
+    console.log(transactionHash);
+  }, 8000);
   // const tx = await entryPoint.handleOps([userOp], address0);
   // const receipt = await tx.wait();
 
