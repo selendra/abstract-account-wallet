@@ -52,10 +52,10 @@ async function main() {
   // console.log(await ethers.provider.getBalance("0xcE2Dd4ef6aD5e8aB787B35BED941A5c213C99Dd6"))
 
    // Encoding the call to the increment function
-  // const callData = encodeData("0xcE2Dd4ef6aD5e8aB787B35BED941A5c213C99Dd6", 5, "0x");  // transfer native token
-  const storagedata = await encodeStoragedata(3); // example of call other contract funtion
-  const stotageAddress = "0x0165878A594ca255338adfa4d48449f69242Eb8F" // target contract
-  const callData = encodeData(stotageAddress, 0, storagedata);
+  const callData = encodeData("0xcE2Dd4ef6aD5e8aB787B35BED941A5c213C99Dd6", 5, "0x");  // transfer native token
+  // const storagedata = await encodeStoragedata(3); // example of call other contract funtion
+  // const stotageAddress = "0x0165878A594ca255338adfa4d48449f69242Eb8F" // target contract
+  // const callData = encodeData(stotageAddress, 0, storagedata);
 
   const userOp: any = {
     sender,
