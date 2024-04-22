@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { ethers as bundler } from "ethers";
+import { BigNumberish, ethers as bundler } from "ethers";
 import { randomBytes } from "crypto";
 
 const bundlerProvider = new bundler.JsonRpcProvider("http://127.0.0.1:3000");
@@ -44,11 +44,24 @@ async function main() {
     initCode = "0x";
   }
 
+  const encodeData = (target: string, value: BigNumberish, data: string) => {
+    return Account.interface.encodeFunctionData('execute', [target, value, data])
+  }
+
+  // console.log(await ethers.provider.getBalance(sender))
+  // console.log(await ethers.provider.getBalance("0xcE2Dd4ef6aD5e8aB787B35BED941A5c213C99Dd6"))
+
+   // Encoding the call to the increment function
+  // const callData = encodeData("0xcE2Dd4ef6aD5e8aB787B35BED941A5c213C99Dd6", 5, "0x");  // transfer native token
+  const storagedata = await encodeStoragedata(3); // example of call other contract funtion
+  const stotageAddress = "0x0165878A594ca255338adfa4d48449f69242Eb8F" // target contract
+  const callData = encodeData(stotageAddress, 0, storagedata);
+
   const userOp: any = {
     sender,
     nonce: "0x" + (await entryPoint.getNonce(sender, 0)).toString(16),
     initCode,
-    callData: Account.interface.encodeFunctionData("increment"), // Encoding the call to the increment function
+    callData,
     paymasterAndData: PM_ADRRES,
     signature: "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c",
   }; // Execute the user operation via the EntryPoint contract, passing the userOp and the fee receiver address
@@ -72,8 +85,6 @@ async function main() {
   const userOpHash = await entryPoint.getUserOpHash(userOp);
   userOp.signature = (await (signer0.signMessage(ethers.getBytes(userOpHash)))).toString();
 
-  console.log(userOp.signature)
-
   const opHash = await bundlerProvider.send("eth_sendUserOperation", [
     userOp,
     EP_ADDRESS,
@@ -87,6 +98,8 @@ async function main() {
 
     console.log(transactionHash);
   }, 8000);
+
+
   // const tx = await entryPoint.handleOps([userOp], address0);
   // const receipt = await tx.wait();
 
@@ -99,3 +112,12 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+
+async function encodeStoragedata(value: BigNumberish,): Promise<string> {
+
+  const contractAbi = await ethers.getContractFactory("Storage");
+  const callData = contractAbi.interface.encodeFunctionData('store', [value])
+
+  return callData
+}
