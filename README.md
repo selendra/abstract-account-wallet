@@ -1,4 +1,6 @@
 # abstract-account-wallet
+## Todo
+- Not support Selendra chain cause some gaslimit problem
 
 ## To run account abstrate in locally
 
