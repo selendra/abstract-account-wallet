@@ -21,7 +21,7 @@ async function main() {
 	const [owner] = await ethers.getSigners();
 	// await deploy(owner)
 
-    const storage = "0x0165878A594ca255338adfa4d48449f69242Eb8F"
+    const storage = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
 
     // await store(owner, storage, 5);
     await retrieve(owner, storage);

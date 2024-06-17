@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { BigNumberish, ethers as bundler } from "ethers";
 import { randomBytes } from "crypto";
 
-const bundlerProvider = new bundler.JsonRpcProvider("http://127.0.0.1:3000");
+const bundlerProvider = new bundler.JsonRpcProvider("http://0.0.0.0:3000");
 
 // Define constants for the factory contract's nonce and addresses
 const FACTORY_NONCE = 1;
@@ -16,9 +16,7 @@ async function main() {
   const AccountFactory = await ethers.getContractFactory("LightAccountFactory");
   const Account = await ethers.getContractFactory("LightAccount");
 
-  // Retrieve the first signer from the hardhat environment
   const [signer0] = await ethers.getSigners();
-  // Get the address of the first signer
   const address0 = await signer0.getAddress();
 
   const salt = "0x33e34b09d1f4ca3ab07f99aaadbd13af9a7bd9bf" //"0x" + randomBytes(32).toString("hex");
@@ -48,14 +46,12 @@ async function main() {
     return Account.interface.encodeFunctionData('execute', [target, value, data])
   }
 
-  // console.log(await ethers.provider.getBalance(sender))
-  // console.log(await ethers.provider.getBalance("0xcE2Dd4ef6aD5e8aB787B35BED941A5c213C99Dd6"))
+  // Encoding the call to the increment function
+  // const callData = encodeData("0xcE2Dd4ef6aD5e8aB787B35BED941A5c213C99Dd6", 1, "0x");  // transfer native token
 
-   // Encoding the call to the increment function
-  const callData = encodeData("0xcE2Dd4ef6aD5e8aB787B35BED941A5c213C99Dd6", 5, "0x");  // transfer native token
-  // const storagedata = await encodeStoragedata(3); // example of call other contract funtion
-  // const stotageAddress = "0x0165878A594ca255338adfa4d48449f69242Eb8F" // target contract
-  // const callData = encodeData(stotageAddress, 0, storagedata);
+  const storagedata = await encodeStoragedata(3); // example of call other contract funtion
+  const stotageAddress = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707" // target contract
+  const callData = encodeData(stotageAddress, 0, storagedata);
 
   const userOp: any = {
     sender,
@@ -66,16 +62,9 @@ async function main() {
     signature: "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c",
   }; // Execute the user operation via the EntryPoint contract, passing the userOp and the fee receiver address
 
-  
-  const { preVerificationGas, verificationGasLimit, callGasLimit } =
-    await bundlerProvider.send("eth_estimateUserOperationGas", [
-      userOp,
-      EP_ADDRESS,
-    ]);
-
-  userOp.callGasLimit = callGasLimit;
-  userOp.verificationGasLimit = verificationGasLimit;
-  userOp.preVerificationGas = preVerificationGas;
+  userOp.callGasLimit = 2000_000;
+  userOp.verificationGasLimit = 2000_000;
+  userOp.preVerificationGas = 5000_000;
 
   const { maxFeePerGas, maxPriorityFeePerGas } = await ethers.provider.getFeeData();
 
@@ -85,26 +74,9 @@ async function main() {
   const userOpHash = await entryPoint.getUserOpHash(userOp);
   userOp.signature = (await (signer0.signMessage(ethers.getBytes(userOpHash)))).toString();
 
-  const opHash = await bundlerProvider.send("eth_sendUserOperation", [
-    userOp,
-    EP_ADDRESS,
-  ]);
-
-    setTimeout(async () => {
-    const { transactionHash } = await bundlerProvider.send(
-      "eth_getUserOperationByHash",
-      [opHash]
-    );
-
-    console.log(transactionHash);
-  }, 8000);
-
-
-  // const tx = await entryPoint.handleOps([userOp], address0);
-  // const receipt = await tx.wait();
-
-  // console.log(opHash);
-
+  const tx = await entryPoint.handleOps([userOp], address0);
+  const receipt = await tx.wait();
+  console.log(receipt)
 }
 
 // Execute the main function and handle any errors
