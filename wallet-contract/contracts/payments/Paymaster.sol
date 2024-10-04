@@ -4,22 +4,20 @@ pragma solidity ^0.8.19;
 import "@account-abstraction/contracts/interfaces/IPaymaster.sol";
 
 contract Paymaster is IPaymaster {
+    function validatePaymasterUserOp(
+        PackedUserOperation calldata,
+        bytes32,
+        uint256
+    ) external pure returns (bytes memory context, uint256 validationData) {
+        // // 20 bytes: paymaster address
+        // // timeperiod: valiadte for paymasyer have paid
+        // // signature: own payment balance that willing pay
+        // userop.paymasterAndData
 
-    function validatePaymasterUserOp(UserOperation calldata, bytes32, uint256)
-            external
-            pure
-            returns (bytes memory context, uint256 validationData) 
-        {
-
-            // // 20 bytes: paymaster address
-            // // timeperiod: valiadte for paymasyer have paid
-            // // signature: own payment balance that willing pay
-            // userop.paymasterAndData
-
-            // without validate for testing
-            context = new bytes(0);
-            validationData = 0;
-        }
+        // without validate for testing
+        context = new bytes(0);
+        validationData = 0;
+    }
 
     /**
      * post-operation handler.
@@ -32,5 +30,16 @@ contract Paymaster is IPaymaster {
      * @param context - the context value returned by validatePaymasterUserOp
      * @param actualGasCost - actual gas used so far (without this postOp call).
      */
-    function postOp(PostOpMode mode, bytes calldata context, uint256 actualGasCost) external {}
+    function postOp(
+        PostOpMode mode,
+        bytes calldata context,
+        uint256 actualGasCost
+    ) external {}
+
+    function postOp(
+        PostOpMode mode,
+        bytes calldata context,
+        uint256 actualGasCost,
+        uint256 actualUserOpFeePerGas
+    ) external override {}
 }

@@ -1,20 +1,21 @@
 import { ethers } from "hardhat";
 
 async function main() {
-	const EP_ADDRESS = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
+	const EP_ADDRESS = "0x0000000071727De22E5E9d8BAf0edAc6f37da032";
 
 	const [owner] = await ethers.getSigners();
 
+	// const accountFactory = await ethers.getContractFactory('LightAccountFactory', owner);
 	const paymaster = await ethers.getContractFactory('Paymaster', owner);
-	const accountFactory = await ethers.getContractFactory('LightAccountFactory', owner);
 
 	const pm = await paymaster.deploy();
-	const af = await accountFactory.deploy(EP_ADDRESS) as any;
+	// const af = await accountFactory.deploy(owner, EP_ADDRESS) as any;
 
+	// const afAddr = await af.getAddress()
 	const pmAddr = await pm.getAddress()
-	const afAddr = await af.getAddress()
+
 	console.log(`paymaster address: ${pmAddr}`)
-	console.log(`Account Factory address: ${afAddr}`)
+	// console.log(`Account Factory address: ${afAddr}`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
