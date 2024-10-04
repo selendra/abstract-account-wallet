@@ -170,3 +170,6 @@
       console.log(transactionHash);
     }, 8000);
   ```
+
+
+yarn run bundler --network https://rpc.selendra.org --mnemonic file.txt 

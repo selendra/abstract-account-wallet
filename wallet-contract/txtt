@@ -1,0 +1,16 @@
+Created UserOperation: {
+  sender: '0x4045F3675412dC57df28d07dD2c4976E30bE711E',
+  nonce: '0x00',
+  factory: '0x51e5eDFb3C66DE71516D0B92417f3DDe81F96C68',
+  factoryData: '0x000000000000000000000000ab89ea78bab322ca2062dff7ea0530c7fb03156e',
+  callData: '0xa9059cbb0000000000000000000000005bcae15e6eb33c4e54b0738baeb895fc3adf8d85000000000000000000000000000000000000000000000000016345785d8a0000',
+  callGasLimit: '0x0',
+  verificationGasLimit: '0x0',
+  preVerificationGas: '0x0',
+  maxFeePerGas: '0x012d1cd5f2',
+  maxPriorityFeePerGas: '0x00',
+  paymaster: '0xda2Bd5566c6dEfe816b204ce9333a8526150dAa8',
+  paymasterData: '0x',
+  signature: '0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c'
+}
+Gas Estimation: { preVerificationGas: '0x5648' }
