@@ -7,7 +7,7 @@ async function main() {
   const entryPoint = await ethers.getContractAt("EntryPoint", EP_ADDRESS);
 
   await entryPoint.depositTo(PM_ADDRESS, {
-    value: ethers.parseEther("0.1"),
+    value: ethers.parseEther("1"),
   });
 
   console.log("deposit was successful!");

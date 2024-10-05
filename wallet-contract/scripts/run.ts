@@ -1,4 +1,3 @@
-import { ethers as hre } from "hardhat";
 import { ethers } from "ethers";
 
 interface UserOperation {
@@ -12,8 +11,6 @@ interface UserOperation {
   preVerificationGas: string;
   maxFeePerGas: string;
   maxPriorityFeePerGas: string;
-  paymasterVerificationGasLimit: string,
-  paymasterPostOpGasLimit: string,
   paymaster: string;
   paymasterData: string;
   signature: string;
@@ -25,9 +22,11 @@ interface GasEstimation {
   callGasLimit: string;
 }
 
+
 const EntryPointABI = [
-  "function simulateValidation(tuple(address sender, uint256 nonce, address factory, bytes factoryData, bytes callData, uint256 callGasLimit, uint256 verificationGasLimit, uint256 preVerificationGas, uint256 maxFeePerGas, uint256 maxPriorityFeePerGas, uint256 paymasterVerificationGasLimit, uint256 paymasterPostOpGasLimit, address paymaster, bytes paymasterData, bytes signature) calldata userOp) external",
+  "function simulateValidation(tuple(address sender, uint256 nonce, address factory, bytes factoryData, bytes callData, uint256 callGasLimit, uint256 verificationGasLimit, uint256 preVerificationGas, uint256 maxFeePerGas, uint256 maxPriorityFeePerGas, address paymaster, bytes paymasterData, bytes signature) calldata userOp) external",
   "function simulateExecution(address sender, bytes calldata callData) external",
+  "function getNonce(address sender, uint192 key) view returns (uint256)",
   "function handleOps(tuple(address sender, uint256 nonce, bytes initCode, bytes callData, uint256 callGasLimit, uint256 verificationGasLimit, uint256 preVerificationGas, uint256 maxFeePerGas, uint256 maxPriorityFeePerGas, address paymaster, bytes paymasterData, bytes signature)[] calldata ops, address beneficiary) external",
 ];
 
@@ -41,7 +40,10 @@ async function eth_estimateUserOperationGas(userOperation: UserOperation, entryP
     const preVerificationGas = estimatePreVerificationGas(userOperation);
   
     // 2. Estimate verificationGas
-    const verificationGas = await estimateVerificationGas(entryPoint, userOperation);
+    // const verificationGas = await estimateVerificationGas(entryPoint, userOperation);
+
+    const result = await manualSimulateValidation(provider, entryPointAddress, userOperation);
+    console.log("Validation result:", result);
   
     // // 3. Estimate callGasLimit
     // const callGasLimit = await estimateCallGasLimit(entryPoint, userOperation);
@@ -49,7 +51,7 @@ async function eth_estimateUserOperationGas(userOperation: UserOperation, entryP
     return {
       preVerificationGas: ethers.toBeHex(preVerificationGas),
     //   verificationGas: ethers.toBeHex(verificationGas),
-    //   callGasLimit: ethers.toBeHex(callGasLimit)
+      // callGasLimit: ethers.toBeHex(callGasLimit)
     };
   }
   
@@ -116,14 +118,12 @@ async function eth_estimateUserOperationGas(userOperation: UserOperation, entryP
       factory: factoryAddress,
       factoryData: factoryData,
       callData: callData,
-      callGasLimit: "0x7A1200", // Will be filled by estimation
-      verificationGasLimit: "0x927C0", // Will be filled by estimation
-      preVerificationGas: "0x15F90", // Will be filled by estimation
+      callGasLimit: "0x100000", // Will be filled by estimation
+      verificationGasLimit: "0x100000", // Will be filled by estimation
+      preVerificationGas:  "0x100000", // Will be filled by estimation
       maxFeePerGas: ethers.toBeHex(feeData.maxFeePerGas || 0),
       maxPriorityFeePerGas: ethers.toBeHex(feeData.maxPriorityFeePerGas || 0),
-      paymasterVerificationGasLimit: "0x927C0",
-      paymasterPostOpGasLimit: "0x927C0",
-      paymaster: payMasterAddress, // No paymaster in this example
+      paymaster: payMasterAddress,
       paymasterData: "0x",
       signature: "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c", // Will be filled later
     };
@@ -191,7 +191,7 @@ async function main() {
       "transfer",
       ["0x5bCae15E6EB33C4E54b0738bAeb895Fc3aDF8d85", ethers.parseEther("0.1")]
     );
-  
+
     const userOp = await createUserOperation(
       provider,
       entryPointAddress,
@@ -209,3 +209,80 @@ async function main() {
   }
   
   main().catch(console.error);
+
+
+  async function manualSimulateValidation(
+    provider: ethers.Provider,
+    entryPointAddress: string,
+    userOp: UserOperation
+  ): Promise<{ success: boolean; gasUsed: bigint; validationResult: string }> {
+    const entryPoint = new ethers.Contract(entryPointAddress, EntryPointABI, provider);
+  
+    try {
+      // Step 1: Verify the sender exists
+      const senderCode = await provider.getCode(userOp.sender);
+      if (senderCode === '0x' && userOp.factory === ethers.ZeroAddress) {
+        throw new Error("Sender doesn't exist and no factory provided");
+      }
+  
+      // Step 2: Check nonce
+      const nonce = await entryPoint.getNonce(userOp.sender, 0);
+      if (ethers.toBigInt(userOp.nonce) !== nonce) {
+        throw new Error(`Invalid nonce. Expected: ${nonce}, Got: ${userOp.nonce}`);
+      }
+  
+      // Step 3: Validate paymaster if present
+      if (userOp.paymaster !== ethers.ZeroAddress) {
+        const paymasterCode = await provider.getCode(userOp.paymaster);
+        if (paymasterCode === '0x') {
+          throw new Error("Paymaster doesn't exist");
+        }
+        // Additional paymaster validation would go here
+      }
+  
+      // Step 4: Estimate gas for the call
+      let gasUsed = ethers.toBigInt(userOp.preVerificationGas);
+      
+      // // If factory is provided, estimate gas for account creation
+      // if (userOp.factory !== ethers.ZeroAddress) {
+      //   const factoryGasEstimate = await provider.estimateGas({
+      //     to: userOp.factory,
+      //     data: userOp.factoryData
+      //   });
+      //   gasUsed += factoryGasEstimate;
+      // }
+  
+      // Estimate gas for the main call
+      const callGasEstimate = await provider.estimateGas({
+        to: userOp.sender,
+        data: userOp.callData
+      });
+      gasUsed += callGasEstimate;
+  
+      // Step 5: Validate signature
+      // This is a simplified check. In a real implementation, you'd need to recover the signer from the signature
+      if (userOp.signature === '0x') {
+        throw new Error("Signature is empty");
+      }
+  
+      // Step 6: Check if the account has enough balance
+      const requiredPrefund = ethers.toBigInt(userOp.callGasLimit) * ethers.toBigInt(userOp.maxFeePerGas);
+      const accountBalance = await provider.getBalance(userOp.sender);
+      if (accountBalance < requiredPrefund) {
+        throw new Error(`Insufficient balance. Required: ${requiredPrefund}, Got: ${accountBalance}`);
+      }
+  
+      return {
+        success: true,
+        gasUsed,
+        validationResult: "UserOperation is valid"
+      };
+  
+    } catch (error) {
+      return {
+        success: false,
+        gasUsed: ethers.toBigInt(0),
+        validationResult: error instanceof Error ? error.message : "Unknown error occurred"
+      };
+    }
+  }
