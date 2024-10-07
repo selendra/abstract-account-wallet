@@ -5,17 +5,17 @@ async function main() {
 
 	const [owner] = await ethers.getSigners();
 
-	// const accountFactory = await ethers.getContractFactory('LightAccountFactory', owner);
+	const accountFactory = await ethers.getContractFactory('LightAccountFactory', owner);
 	const paymaster = await ethers.getContractFactory('Paymaster', owner);
 
 	const pm = await paymaster.deploy();
-	// const af = await accountFactory.deploy(owner, EP_ADDRESS) as any;
+	const af = await accountFactory.deploy(owner, EP_ADDRESS) as any;
 
-	// const afAddr = await af.getAddress()
+	const afAddr = await af.getAddress()
 	const pmAddr = await pm.getAddress()
 
 	console.log(`paymaster address: ${pmAddr}`)
-	// console.log(`Account Factory address: ${afAddr}`)
+	console.log(`Account Factory address: ${afAddr}`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

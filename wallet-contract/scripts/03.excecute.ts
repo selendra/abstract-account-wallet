@@ -5,8 +5,8 @@ import { randomBytes } from "crypto";
 const bundlerProvider = new bundler.JsonRpcProvider("http://127.0.0.1:3000");
 
 const EP_ADDRESS = "0x0000000071727De22E5E9d8BAf0edAc6f37da032";
-const PM_ADRRES = "0xda2Bd5566c6dEfe816b204ce9333a8526150dAa8";
-const FACTORY_ADDRESS = "0x51e5eDFb3C66DE71516D0B92417f3DDe81F96C68";
+const PM_ADRRES = "0x99202434921642effF80D50cCa49f1dd74D9bF8F";
+const FACTORY_ADDRESS = "0xb323171fD9b7fC7d577F68623Ea012f37E816AC8";
 
 async function main() {
   // Retrieve the deployed EntryPoint contract
@@ -21,8 +21,7 @@ async function main() {
   // Get the address of the first signer
   const address0 = await signer0.getAddress();
 
-  const salt = "0x33e34b09d1f4ca3ab07f99aaadbd13af9a7bd9bf" //"0x" + randomBytes(32).toString("hex");
-
+  const salt = "0x33e34b09d1f4ca3ab07f99aaadbd13af6a7bd9bf" //"0x" + randomBytes(32).toString("hex");
 
   await AFactory.createAccount(address0, salt);
 
@@ -41,6 +40,7 @@ async function main() {
   }
 
   console.log(sender);
+  console.log(initCode);
 
   // check if acount have been create
   const senderIsDeploy = await ethers.provider.getCode(sender);
@@ -69,18 +69,16 @@ async function main() {
     signature: '0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c',
     paymaster: PM_ADRRES,
   }; // Execute the user operation via the EntryPoint contract, passing the userOp and the fee receiver address
-
-  console.log
   
-  try {
-    const data = await bundlerProvider.send("eth_estimateUserOperationGas", [
-      userOp,
-      EP_ADDRESS,
-    ]);
-    console.log(data)
-  }catch(error){
-    console.log(error)
-  }
+  // try {
+  //   const data = await bundlerProvider.send("eth_estimateUserOperationGas", [
+  //     userOp,
+  //     EP_ADDRESS,
+  //   ]);
+  //   console.log(data)
+  // }catch(error){
+  //   console.log(error)
+  // }
    
   
 
