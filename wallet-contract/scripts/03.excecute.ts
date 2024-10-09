@@ -21,7 +21,7 @@ async function main() {
   // Get the address of the first signer
   const address0 = await signer0.getAddress();
 
-  const salt = "0x33e34b09d1f4ca3ab07f99aaadbd13af6a7bd9bf" //"0x" + randomBytes(32).toString("hex");
+  const salt = "0x33e34b09d1f4ca3ab07f99aaadbd13af9a7bd9bf" //"0x" + randomBytes(32).toString("hex");
 
   await AFactory.createAccount(address0, salt);
 
@@ -40,7 +40,6 @@ async function main() {
   }
 
   console.log(sender);
-  console.log(initCode);
 
   // check if acount have been create
   const senderIsDeploy = await ethers.provider.getCode(sender);
@@ -56,10 +55,12 @@ async function main() {
   // console.log(await ethers.provider.getBalance("0xAb89ea78baB322ca2062DFf7EA0530C7fb03156E"))
 
   // //  // Encoding the call to the increment function
-  // const callData = encodeData("0xAb89ea78baB322ca2062DFf7EA0530C7fb03156E", "100000000000000000", "0x");  // transfer native token
-  const storagedata = await encodeStoragedata(3); // example of call other contract funtion
-  const stotageAddress = "0x6E0E1090348AC4061fEd3b079B34Ba594Aa4815B" // target contract
-  const callData = encodeData(stotageAddress, 0, storagedata);
+  const callData = encodeData("0xAb89ea78baB322ca2062DFf7EA0530C7fb03156E", "100000000000000000", "0x");  // transfer native token
+  // const storagedata = await encodeStoragedata(3); // example of call other contract funtion
+  // const stotageAddress = "0x6E0E1090348AC4061fEd3b079B34Ba594Aa4815B" // target contract
+  // const callData = encodeData(stotageAddress, 0, storagedata);
+
+  console.log(callData)
 
   const userOp: any = {
     sender,
