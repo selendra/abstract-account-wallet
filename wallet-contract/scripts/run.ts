@@ -19,48 +19,17 @@ interface UserOperation {
   signature: string;
 }
 
-interface UserOperation1 {
-  sender: string;
-  nonce: string;
-  initCode: string;
-  callData: string;
-  accountGasLimits: string;
-  preVerificationGas: string;
-  gasFees: string;
-  paymasterAndData: string;
-  signature: string;
-}
-
-interface UserOperation2 {
-  sender: string;
-  nonce: string;
-  factory: string;
-  factoryData: string;
-  callData: string;
-  callGasLimit: string;
-  verificationGasLimit: string;
-  preVerificationGas: string;
-  maxFeePerGas: string;
-  maxPriorityFeePerGas: string;
-  paymaster: string;
-  paymasterData: string;
-  paymasterVerificationGasLimit: string,
-  paymasterPostOpGasLimit: string,
-  signature: string;
-}
-
 interface GasEstimation {
   preVerificationGas: string;
   verificationGasLimit: string;
   callGasLimit: string;
 }
-
-interface EntryPointInterface extends ethers.BaseContract {
-  simulateValidation(userOp: UserOperation): Promise<void>;
-  handleOps(ops: UserOperation[], beneficiary: string): Promise<ethers.ContractTransaction>;
-}
-
-const EntryPointABI = EntryPoint__factory.abi;
+// const EntryPointABI = EntryPoint__factory.abi;
+const EntryPointABI = [
+  "function balanceOf(address account) public view returns (uint256)",
+  "function getNonce(address sender, uint192 key) view returns (uint256)",
+  "function handleOps(tuple(address sender, uint256 nonce, address factory, bytes factoryData, bytes callData, uint256 callGasLimit, uint256 verificationGasLimit, uint256 preVerificationGas, uint256 maxFeePerGas, uint256 maxPriorityFeePerGas, address paymaster, bytes paymasterData, bytes signature)[] calldata ops, address beneficiary) external",
+];
 
 const provider = new ethers.JsonRpcProvider('https://rpc.selendra.org');
 
@@ -272,8 +241,8 @@ async function eth_estimateUserOperationGas(
     const factoryData = createFactoryData(ownerAddress);
   
     // 2. Calculate the counterfactual address (sender)
-    const sender = await calculateCounterfactualAddress(factoryAddress, factoryData);
-    // const sender = "0xe78573331e88c65ed4cf0317c711d36066b1abe5"
+    // const sender = await calculateCounterfactualAddress(factoryAddress, factoryData);
+    const sender = "0xe78573331e88c65ed4cf0317c711d36066b1abe5"
   
     // 3. Get the current nonce for the account (it should be 0 for a new account)
     const entryPoint = new ethers.Contract(entryPointAddress, EntryPointABI, provider);
@@ -287,7 +256,7 @@ async function eth_estimateUserOperationGas(
       sender: sender,
       nonce: ethers.toBeHex(nonce),
       factory: factoryAddress,
-      factoryData: factoryData,
+      factoryData: "0x",
       callData: callData,
       callGasLimit: "0x7A1200", // Will be filled by estimation
       verificationGasLimit: "0x927C0", // Will be filled by estimation
@@ -340,27 +309,25 @@ async function eth_estimateUserOperationGas(
       ]);
     }
 
-    // const entryPoint = new ethers.Contract(entryPointAddress, EntryPointABI, provider);
-    // const entryPointWithSigner = entryPoint.connect(signer);
+    const entryPoint = new ethers.Contract(entryPointAddress, EntryPointABI, provider);
+    const entryPointWithSigner = entryPoint.connect(signer);
 
-    const entryPoint = await hre.getContractAt("EntryPoint", entryPointAddress);
+    // const entryPoint = await hre.getContractAt("EntryPoint", entryPointAddress);
 
-    const gasFees = packUint(BigInt(userOp.maxFeePerGas), BigInt(userOp.maxPriorityFeePerGas))
-    const accountGasLimits  = packUint(BigInt(userOp.callGasLimit), BigInt(userOp.verificationGasLimit))
+    // const gasFees = packUint(BigInt(userOp.maxFeePerGas), BigInt(userOp.maxPriorityFeePerGas))
+    // const accountGasLimits  = packUint(BigInt(userOp.callGasLimit), BigInt(userOp.verificationGasLimit))
 
-    const paymasterVerificationGasLimit = 600000n;
-    const postOpGasLimit = 600000;
+    // const paymasterVerificationGasLimit = 600000n;
+    // const postOpGasLimit = 600000;
 
-    const paymasterAndData = packPaymasterData(
-      userOp.paymaster,
-      paymasterVerificationGasLimit,
-      postOpGasLimit,
-      userOp.paymasterData
-    )
+    // const paymasterAndData = packPaymasterData(
+    //   userOp.paymaster,
+    //   paymasterVerificationGasLimit,
+    //   postOpGasLimit,
+    //   userOp.paymasterData
+    // )
 
-    userOp.factoryData = "0x"
-
-    // let userOp1: UserOperation1 = {
+    // let userOp1: any = {
     //   sender: userOp.sender,
     //   nonce: userOp.nonce,
     //   initCode: "0x",
@@ -372,72 +339,22 @@ async function eth_estimateUserOperationGas(
     //   signature: userOp.signature
     // }
 
+    const address = await signer.getAddress()
+    const tx = await (entryPointWithSigner as any).handleOps([userOp], address);
+    const receipt = await tx.wait();
+    console.log(receipt)
 
-    // interface UserOperation2 {
-    //   sender: string;
-    //   nonce: string;
-    //   factory: string;
-    //   factoryData: string;
-    //   callData: string;
-    //   callGasLimit: string;
-    //   verificationGasLimit: string;
-    //   preVerificationGas: string;
-    //   maxFeePerGas: string;
-    //   maxPriorityFeePerGas: string;
-    //   paymaster: string;
-    //   paymasterData: string;
-    //   paymasterVerificationGasLimit: string,
-    //   paymasterPostOpGasLimit: string,
-    //   signature: string;
-    // }
-
-
-     let userOp1: UserOperation2 = {
-      sender: userOp.sender,
-      nonce: userOp.nonce,
-      factory: userOp.factory,
-      factoryData: "0x",
-      callData: userOp.callData,
-      callGasLimit: userOp.callGasLimit,
-      verificationGasLimit: userOp.verificationGasLimit,
-      preVerificationGas: userOp.preVerificationGas,
-      maxFeePerGas: userOp.maxFeePerGas,
-      maxPriorityFeePerGas: userOp.maxPriorityFeePerGas,
-      paymaster: userOp.paymaster,
-      paymasterData: userOp.paymasterData,
-      paymasterVerificationGasLimit: "0x927C0",
-      paymasterPostOpGasLimit: "0x927C0",
-      signature: userOp.signature
-    }
-
-
-    const bundlerProvider = new ethers.JsonRpcProvider("http://127.0.0.1:14337/rpc");
-    const opHash = await bundlerProvider.send("eth_sendUserOperation", [
-        userOp1,
-        entryPointAddress,
-      ]);
-    
-        setTimeout(async () => {
-        const { transactionHash } = await bundlerProvider.send(
-          "eth_getUserOperationByHash",
-          [opHash]
-        );
-    
-        console.log(transactionHash);
-      }, 8000);
-    
-    // const address = await signer.getAddress()
     // try {
-    //   const tx = await entryPoint.handleOps([userOp1], "0xAb89ea78baB322ca2062DFf7EA0530C7fb03156E");
-    //   // const receipt = tx.wait();
-    //   // console.log(tx)
-    //   return "receipt.transactionHash";
+    //   const tx = await entryPoint.handleOps([userOp1], "0xAb89ea78baB322ca2062DFf7EA0530C7fb03156E", { gasPrice: ethers.parseUnits("50", "gwei"),  gasLimit: 1_000_000 });
+    //   const receipt = await tx.wait();
+    //   return receipt?.hash ? receipt?.hash: "0x";
     // } catch (error) {
     //   console.error('Failed to send UserOperation:', error);
     //   throw error;
     // }
 
-    return "0x"
+    return "ox"
+
   }
 
 // Usage example
@@ -481,8 +398,6 @@ async function main() {
   userOp.callGasLimit = gasEstimation.callGasLimit;
   userOp.verificationGasLimit = gasEstimation.verificationGasLimit;
   userOp.preVerificationGas = gasEstimation.preVerificationGas;
-
-  console.log("Created UserOperation:", userOp);
 
   // Send user operation
   const txHash = await eth_sendUserOperation(userOp, entryPointAddress, signer);
