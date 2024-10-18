@@ -2,18 +2,18 @@
 
 - Deploy **entrypoint** , **LightAccount** and **SimplePaymantMaster** *(PaymantMaster contract for testing only)*
   ```sh
-      npx hardhat run scripts/01.deploy.ts
+  npx hardhat run scripts/01.deploy.ts
   ```
 - Deposit balance to PaymentMaster contract for cover transaction fees
 
   ```sh
-      npx hardhat run scripts/02.deposit.ts
+  npx hardhat run scripts/02.deposit.ts
   ```
 
 - Excute sample transaction from aa-account
 
   ```sh
-      npx hardhat run scripts/03.excecute.ts
+  npx hardhat run scripts/03.excecute.ts
   ```
 
   > **note**: aa-account balance is 0 transfer first for testing
