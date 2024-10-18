@@ -1,39 +1,19 @@
 # abstract-account-wallet
-## Todo
-- Not support Selendra chain cause some gaslimit problem
 
-## To run account abstrate in locally
-
-- Run bundler and local ethereum
-
+- Deploy **entrypoint** , **LightAccount** and **SimplePaymantMaster** *(PaymantMaster contract for testing only)*
   ```sh
-  docker compose up -d
-  ```
-
-  - **note**: Bundler is relayer service for execute Account abstration transaction
-
-- Deploy Entrypoint (core contrate of Account-Abstraction)
-
-  ```sh
-   cd thirdparty/account-abstraction && yarn deploy --network localhost
-  ```
-
-  > **note**: This bundler work only with entrypoint address: 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
-
-- Deploy **LightAccount** and **SimplePaymantMaster** *(PaymantMaster contract for testing only)*
-  ```sh
-      cd wallet-contract && npx hardhat run scripts/01.deploy.ts
+      npx hardhat run scripts/01.deploy.ts
   ```
 - Deposit balance to PaymentMaster contract for cover transaction fees
 
   ```sh
-      cd wallet-contract && npx hardhat run scripts/02.deposit.ts
+      npx hardhat run scripts/02.deposit.ts
   ```
 
 - Excute sample transaction from aa-account
 
   ```sh
-      cd wallet-contract && npx hardhat run scripts/03.excecute.ts
+      npx hardhat run scripts/03.excecute.ts
   ```
 
   > **note**: aa-account balance is 0 transfer first for testing
