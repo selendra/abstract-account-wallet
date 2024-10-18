@@ -23,7 +23,7 @@ const config: HardhatUserConfig = {
 		  },
 		],
 	  },
-	defaultNetwork: "localhost",
+	defaultNetwork: "selendra",
 	networks: {
 		localhost: { 
 			url: 'http://127.0.0.1:14337/rpc',
